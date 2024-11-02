@@ -1,9 +1,10 @@
 // @deno-types="npm:@types/cheerio@^0.22.35"
 import { load } from "npm:cheerio@1.0.0";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
-import { ApiErrorDto } from "../models/DTOs/api-error-dto.ts";
+import { ApiErrorDto } from "../models/api-error.dto.ts";
 import { time } from "./time-and-date.ts";
 import { sendErrorNotification, sendWatchNotification } from "./notification.ts";
+import { errorLogger, infoLogger } from "./logger.ts";
 
 export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWatch[] | ApiErrorDto> {
   let response: Response;
@@ -13,7 +14,9 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
   } catch (err) {
     const message = `Could not fetch url ${watchToScrape}`;
     console.error(message, err);
-    return { errorMessage: message };
+    return {
+      errorMessage: message,
+    };
   }
 
   const body = await response.text();
@@ -22,7 +25,9 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
 
   // Länken gav inga resultat.
   if ($(".contentRow-title").length === 0) {
-    return { errorMessage: "Watch name yielded no results" };
+    return {
+      errorMessage: "Watch name yielded no results",
+    };
   }
 
   const titles: string[] = [];
@@ -74,6 +79,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
   return scrapedWatches;
 }
 
+// deno-lint-ignore no-unused-vars
 async function handleNewScrapedWatch(scrapedWatches: ScrapedWatch[], newScrapedWatches: ScrapedWatch[], storedWatchRowId: string) {
   // TODO: Ska det vara scrapedWatches eller newScrapedWatches?
   updateStoredWatches(scrapedWatches, storedWatchRowId);

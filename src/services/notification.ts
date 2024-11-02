@@ -22,13 +22,13 @@ export async function sendWatchNotification(emailText: string) {
   if (Deno.env.get("NODE_ENV") === "develop") {
     return;
   }
-  //
-  // await transporter.sendMail({
-  //   from: Deno.env.get("EMAIL"),
-  //   to: Deno.env.get("EMAILTO"),
-  //   subject: "Ny klocka tillgänglig! ⌚",
-  //   text: emailText,
-  // });
+
+  await transporter.sendMail({
+    from: Deno.env.get("EMAIL"),
+    to: Deno.env.get("EMAILTO"),
+    subject: "Ny klocka tillgänglig! ⌚",
+    text: emailText,
+  });
 }
 
 export async function sendErrorNotification(err: unknown) {
@@ -36,10 +36,10 @@ export async function sendErrorNotification(err: unknown) {
     return;
   }
 
-  // await transporter.sendMail({
-  //   from: emailConfig.user,
-  //   to: emailConfig.emailTo,
-  //   subject: "KS Web Scraper: Ett fel inträffade!",
-  //   text: `Error message:\n\n${err}`,
-  // });
+  await transporter.sendMail({
+    from: emailConfig.user,
+    to: emailConfig.emailTo,
+    subject: "KS Web Scraper: Ett fel inträffade!",
+    text: `Error message:\n\n${err}`,
+  });
 }

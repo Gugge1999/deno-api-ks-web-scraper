@@ -1,18 +1,15 @@
 import { Application, Router } from "@oak/oak";
-
-// Kolla
+import { oakCors } from "@tajpouria/cors";
+import apiStatusRoutes from "./src/routes/api-status.ts";
 
 const books = new Map<string, string>();
 books.set("1", "The Hound of the Baskervilles");
 
+// TODO: Kolla på https://github.com/asad-mlbd/deno-api-starter-oak
+
 const router = new Router();
+
 router
-  .get("/", (context) => {
-    context.response.body = "Hello world asdasd!";
-  })
-  .get("/book", (context) => {
-    context.response.body = Array.from(books.values());
-  })
   .get("/book/:id", (context) => {
     console.log("här");
     if (books.has(context?.params?.id)) {
@@ -21,9 +18,13 @@ router
   });
 
 const app = new Application();
-app.use(router.routes());
-app.use(router.allowedMethods());
+
+app.use(oakCors());
+
+//OBS: Lägg märke till routes() med parenteser
+app.use(apiStatusRoutes.routes());
+app.use(apiStatusRoutes.allowedMethods());
 
 console.log("Init web api");
 
-await app.listen({ port: 8000 });
+await app.listen({ port: 3000 });
