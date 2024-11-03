@@ -2,7 +2,6 @@ import postgres from "npm:postgres@3.4.5";
 import "jsr:@std/dotenv/load";
 import { Watch } from "../models/watch.ts";
 import { errorLogger } from "./logger.ts";
-import { httpErrors } from "@oak/oak";
 
 // TODO: För url kanske det går att använda
 // const sql = postgres('postgres://username:password@host:port/database');
@@ -16,33 +15,37 @@ const sql = postgres({
   database: Deno.env.get("PGDATABASE"),
 });
 
-// TODO: Det går nog att skapa en wrapper för att köra all sql. Då slipper man upprepade try catch
-export async function selectAllWatches() {
+export async function runDbQuery<T>(query: T): Promise<T | null> {
   try {
-    return await sql<Watch[]>`select * from watchasd`;
+    return await query;
   } catch (err) {
     handleError(err);
 
-    throw new httpErrors.InternalServerError("asdasdasd oiqj3981u2d");
+    // TODO: Ska den vara kvar?
+    // throw new httpErrors.InternalServerError("Hejsan");
+
+    return null;
   }
+}
+
+export function selectAllWatches() {
+  const query = sql<Watch[]>`select * from watch`;
+  return runDbQuery<postgres.PendingQuery<Watch[]>>(query);
 }
 
 export async function selectAllActiveWatches() {
   return await sql<Watch[]>`select * from watch where active = true`;
 }
 
-export async function deleteWatchById(id: string) {
-  try {
-    return await sql`delete from watch where id = ${id}`;
-  } catch (err) {
-    handleError(err);
-    return null;
-  }
+export function deleteWatchById(id: string) {
+  const query = sql`delete from watch where id = ${id}`;
+  return runDbQuery<postgres.PendingQuery<postgres.Row[]>>(query);
 }
 
 function handleError(err: unknown) {
   errorLogger.error({
-    message: "Function AppDataSource.initialize failed",
+    // TODO: fixa narrowing från err
+    message: "error i sql",
     stacktrace: err,
   });
 }

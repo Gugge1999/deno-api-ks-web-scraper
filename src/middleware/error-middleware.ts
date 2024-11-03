@@ -23,4 +23,4 @@ const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
   }
 };
 
-export { errorMiddleware };
+export default errorMiddleware;
