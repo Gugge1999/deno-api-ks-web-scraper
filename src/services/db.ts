@@ -15,22 +15,28 @@ const sql = postgres({
   database: Deno.env.get("PGDATABASE"),
 });
 
-export async function runDbQuery<T>(query: T): Promise<T | null> {
+interface DbResponse<T> {
+  result: T | null;
+  error: unknown;
+}
+
+export async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
   try {
-    return await query;
+    const result = await query;
+
+    return { result, error: null };
   } catch (err) {
-    handleError(err);
+    errorLogger.error({
+      message: "Error i sql",
+      stacktrace: err,
+    });
 
-    // TODO: Ska den vara kvar?
-    // throw new httpErrors.InternalServerError("Hejsan");
-
-    return null;
+    return { result: null, error: err };
   }
 }
 
 export function selectAllWatches() {
-  const query = sql<Watch[]>`select * from watch`;
-  return runDbQuery<postgres.PendingQuery<Watch[]>>(query);
+  return runDbQuery(sql<Watch[]>`select * from watch`);
 }
 
 export async function selectAllActiveWatches() {
@@ -38,14 +44,5 @@ export async function selectAllActiveWatches() {
 }
 
 export function deleteWatchById(id: string) {
-  const query = sql`delete from watch where id = ${id}`;
-  return runDbQuery<postgres.PendingQuery<postgres.Row[]>>(query);
-}
-
-function handleError(err: unknown) {
-  errorLogger.error({
-    // TODO: fixa narrowing från err
-    message: "error i sql",
-    stacktrace: err,
-  });
+  return runDbQuery(sql`delete from watch where id = ${id}`);
 }

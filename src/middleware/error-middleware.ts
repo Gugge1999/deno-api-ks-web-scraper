@@ -16,8 +16,6 @@ const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
       stacktrace: stack,
     });
 
-    console.error("här");
-
     ctx.response.status = status;
     ctx.response.body = { status, message, stack };
   }
