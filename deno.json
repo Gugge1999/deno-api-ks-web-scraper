@@ -4,6 +4,7 @@
   },
   "imports": {
     "@oak/oak": "jsr:@oak/oak@^17.1.3",
+    "@std/uuid": "jsr:@std/uuid@^1.0.4",
     "@tajpouria/cors": "jsr:@tajpouria/cors@^1.2.1"
   },
   "fmt": {
