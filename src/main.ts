@@ -1,13 +1,11 @@
 import { Application } from "@oak/oak";
 import { oakCors } from "@tajpouria/cors";
-import { time } from "./src/services/time-and-date.ts";
-import errorMiddleware from "./src/middleware/error-middleware.ts";
-import apiStatusRoutes from "./src/routes/api-status.ts";
-import scraperRoutes from "./src/routes/scraper.ts";
+import { time } from "./services/time-and-date.ts";
+import errorMiddleware from "./middleware/error-middleware.ts";
+import apiStatusRoutes from "./routes/api-status.ts";
+import scraperRoutes from "./routes/bevakningar.ts";
 
 // Kolla på https://github.com/asad-mlbd/deno-api-starter-oak
-
-// TODO: Flytta den här filen till src/
 
 const app = new Application();
 
@@ -24,5 +22,6 @@ app.use(scraperRoutes.allowedMethods());
 
 console.log(`Init api @ ${time()}`);
 
-// TODO: Ska det vara: process.env.PORT || 3000 som i node?
-await app.listen({ port: 3000 });
+const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
+
+await app.listen({ port: denoPort });

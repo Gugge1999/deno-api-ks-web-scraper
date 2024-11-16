@@ -8,7 +8,7 @@ import { errorLogger, infoLogger } from "./logger.ts";
 import { getAllActiveWatches, updateStoredWatches } from "./db.ts";
 import { intervalInMs } from "../config/config.ts";
 
-export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWatch[] | ApiErrorDto> {
+export async function scrapeWatchInfo(watchToScrape: string): Promise<{ result: ScrapedWatch[] | null; error: string | null }> {
   let response: Response;
 
   try {
@@ -20,7 +20,8 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
 
     console.error(message, err);
     return {
-      errorMessage: message,
+      result: null,
+      error: message,
     };
   }
 
@@ -33,7 +34,8 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
   // Länken gav inga resultat.
   if ($(contentRowTitleClass).length === 0) {
     return {
-      errorMessage: "Watch name yielded no results",
+      result: null,
+      error: "Watch name yielded no results",
     };
   }
 
@@ -85,7 +87,10 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
     scrapedWatches.push(currentWatchInfo);
   });
 
-  return scrapedWatches;
+  return {
+    result: scrapedWatches,
+    error: null,
+  };
 }
 
 export async function compareStoredWithScraped() {
@@ -111,7 +116,7 @@ export async function compareStoredWithScraped() {
 
     const scrapedWatches = await scrapeWatchInfo(storedWatchRow.watchToScrape);
 
-    if ("errorMessage" in scrapedWatches) {
+    if (scrapedWatches.error || scrapedWatches.result === null) {
       return;
     }
 
@@ -119,12 +124,12 @@ export async function compareStoredWithScraped() {
     await new Promise((resolve) => setTimeout(resolve, 1_000));
 
     // TODO: Just nu jämförs de lagrade klockorna och de scrape:ade endast på postedDate. Är det unikt nog ?
-    const newScrapedWatches = scrapedWatches.filter(({ postedDate: a }: { postedDate: string }) => {
+    const newScrapedWatches = scrapedWatches.result.filter(({ postedDate: a }: { postedDate: string }) => {
       return !storedWatches.some(({ postedDate: b }: { postedDate: string }) => b === a);
     });
 
     if (newScrapedWatches.length > 0) {
-      await handleNewScrapedWatch(scrapedWatches, newScrapedWatches, storedWatchRow.id);
+      await handleNewScrapedWatch(scrapedWatches.result, newScrapedWatches, storedWatchRow.id);
     }
   }
 

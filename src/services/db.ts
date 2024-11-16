@@ -4,6 +4,7 @@ import { Watch } from "../models/watch.ts";
 import { errorLogger } from "./logger.ts";
 import { httpErrors } from "@oak/oak";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
+import { v4 } from "@std/uuid";
 
 // TODO: För url kanske det går att använda
 // const sql = postgres('postgres://username:password@host:port/database');
@@ -59,14 +60,16 @@ export async function toggleActiveStatus(isActive: boolean, id: string) {
   return runDbQuery(sql`UPDATE watch SET active = ${isActive} WHERE id = ${id}`);
 }
 
-// TODO: Hämta watches från scraper
-export function saveWatch(label: string, watchToScrape: string) {
-  return runDbQuery(sql`
-    INSERT INTO watch
-      (label, watchToScrape, active, added, watches, lastEmailSent)
+export function saveWatch(label: string, watchToScrape: string, scrapedWatches: string) {
+  // TODO: Kom ihåg att lägga till clock_timestamp() i postgres migration
+
+  const newWatchQuery = sql<Watch[]>`
+    INSERT INTO watch(label, "watchToScrape", active,  watches)
     VALUES
-      (${label}, ${watchToScrape}, true, ${sql`now()`}, ${[]}, null)
-    RETURNING *`);
+    (${label}, ${watchToScrape}, ${true}, ${scrapedWatches})
+    RETURNING *`;
+
+  return runDbQuery(newWatchQuery);
 }
 
 export function updateStoredWatches(scrapedWatches: ScrapedWatch[], storedWatchRowId: string) {}

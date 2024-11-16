@@ -3,6 +3,8 @@ import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus } from ".
 import { validate } from "jsr:@std/uuid";
 import { WatchDto } from "../models/watch-dto.ts";
 import { Watch } from "../models/watch.ts";
+import { scrapeWatchInfo } from "../services/scraper.ts";
+import { ScrapedWatch } from "../models/scraped-watches.ts";
 
 const scraperRoutes = new Router();
 
@@ -31,6 +33,7 @@ scraperRoutes
     const returnDto: WatchDto[] = [];
     if (allWatches.result && allWatches.result.length > 0) {
       for (const scrapedWatch of allWatches.result) {
+        // TODO: Den här fungerar inte med nya insert i kolumn watches
         const dto = createWatchDtoObj(scrapedWatch);
         returnDto.push(dto);
       }
@@ -97,13 +100,37 @@ scraperRoutes
       throw new httpErrors.UnprocessableEntity("label och watchToScrape behöver finnas i body");
     }
 
-    const newWatch = await saveWatch(label, watchToScrape);
+    const scrapedWatches = await scrapeWatchInfo(watchToScrape);
 
-    if (newWatch.error) {
+    if (scrapedWatches.error || scrapedWatches.result === null) {
+      throw new httpErrors.BadRequest("Klockan gav 0 resultat. Försök igen my ny klocka");
+    }
+
+    const newWatch = await saveWatch(label, watchToScrape, JSON.stringify(scrapedWatches.result));
+
+    if (newWatch.error || newWatch.result === null) {
       throw new httpErrors.InternalServerError("Kunde inte spara ny bevakning");
     }
 
-    context.response.body = newWatch;
+    const dbRes = newWatch.result[0];
+
+    const watches: ScrapedWatch[] = JSON.parse(newWatch.result[0].watches.toString());
+
+    const returnDto: WatchDto = {
+      id: dbRes.id,
+      active: true,
+      label: dbRes.label,
+      lastEmailSent: null,
+      added: dbRes.added,
+      watchToScrape: dbRes.watchToScrape,
+      watch: {
+        postedDate: watches[0].postedDate,
+        link: watches[0].link,
+        name: watches[0].name,
+      },
+    };
+
+    context.response.body = returnDto;
   });
 
 export default scraperRoutes;
