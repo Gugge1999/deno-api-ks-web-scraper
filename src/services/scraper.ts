@@ -1,10 +1,12 @@
 // @deno-types="npm:@types/cheerio@^0.22.35"
-import { load } from "npm:cheerio@1.0.0";
+import { load } from "@cheerio";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { ApiErrorDto } from "../models/api-error.dto.ts";
-import { time } from "./time-and-date.ts";
+import { dateAndTime, time } from "./time-and-date.ts";
 import { sendErrorNotification, sendWatchNotification } from "./notification.ts";
 import { errorLogger, infoLogger } from "./logger.ts";
+import { getAllActiveWatches, updateStoredWatches } from "./db.ts";
+import { intervalInMs } from "../config/config.ts";
 
 export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWatch[] | ApiErrorDto> {
   let response: Response;
@@ -12,7 +14,10 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
   try {
     response = await fetch(watchToScrape);
   } catch (err) {
-    const message = `Could not fetch url ${watchToScrape}`;
+    const message = `Kunde inte hämta url url ${watchToScrape}`;
+
+    errorLogger.error({ message });
+
     console.error(message, err);
     return {
       errorMessage: message,
@@ -23,8 +28,10 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
 
   const $ = load(body);
 
+  const contentRowTitleClass = ".contentRow-title";
+
   // Länken gav inga resultat.
-  if ($(".contentRow-title").length === 0) {
+  if ($(contentRowTitleClass).length === 0) {
     return {
       errorMessage: "Watch name yielded no results",
     };
@@ -35,9 +42,9 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
   const links: string[] = [];
 
   // Titel
-  $(".contentRow-title")
+  $(contentRowTitleClass)
     .get()
-    .map((element) => {
+    .map((element: any) => {
       return titles.push(
         $(element)
           .text()
@@ -53,7 +60,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
   // Datum
   $(".u-dt")
     .get()
-    .map((element) => {
+    .map((element: any) => {
       const date = $(element).attr("datetime");
       if (date) {
         dates.push(date);
@@ -61,12 +68,14 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
     });
 
   // Länk
-  $(".contentRow-title")
+  // TODO: Ska element vara av typen Element?
+  $(contentRowTitleClass)
     .get()
-    .map((element) => links.push(`https://klocksnack.se${$(element).find("a").attr("href")}`));
+    .map((element: any) => links.push(`https://klocksnack.se${$(element).find("a").attr("href")}`));
 
   const scrapedWatches: ScrapedWatch[] = [];
 
+  // TODO: Behöver det vara index?
   titles.forEach((_, index) => {
     const currentWatchInfo: ScrapedWatch = {
       name: titles[index],
@@ -79,7 +88,49 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapedWat
   return scrapedWatches;
 }
 
-// deno-lint-ignore no-unused-vars
+export async function compareStoredWithScraped() {
+  const getAllWatchesDbRes = await getAllActiveWatches();
+
+  if (getAllWatchesDbRes.error || getAllWatchesDbRes.result === null) {
+    return;
+  }
+
+  const storedActiveWatches = getAllWatchesDbRes.result;
+
+  if (storedActiveWatches.length === 0) {
+    console.log(`No active watches @ ${dateAndTime()}`);
+  } else {
+    const length = storedActiveWatches.length;
+    console.log(`Scraping ${length} ${length === 1 ? "watch" : "watches"} @ ${dateAndTime()}`);
+  }
+
+  for (const watch of storedActiveWatches) {
+    const storedWatchRow = watch;
+
+    const storedWatches = storedWatchRow.watches;
+
+    const scrapedWatches = await scrapeWatchInfo(storedWatchRow.watchToScrape);
+
+    if ("errorMessage" in scrapedWatches) {
+      return;
+    }
+
+    // Vänta 1 sekund mellan varje anrop till KS
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
+
+    // TODO: Just nu jämförs de lagrade klockorna och de scrape:ade endast på postedDate. Är det unikt nog ?
+    const newScrapedWatches = scrapedWatches.filter(({ postedDate: a }: { postedDate: string }) => {
+      return !storedWatches.some(({ postedDate: b }: { postedDate: string }) => b === a);
+    });
+
+    if (newScrapedWatches.length > 0) {
+      await handleNewScrapedWatch(scrapedWatches, newScrapedWatches, storedWatchRow.id);
+    }
+  }
+
+  setTimeout(compareStoredWithScraped, intervalInMs);
+}
+
 async function handleNewScrapedWatch(scrapedWatches: ScrapedWatch[], newScrapedWatches: ScrapedWatch[], storedWatchRowId: string) {
   // TODO: Ska det vara scrapedWatches eller newScrapedWatches?
   updateStoredWatches(scrapedWatches, storedWatchRowId);
@@ -88,13 +139,14 @@ async function handleNewScrapedWatch(scrapedWatches: ScrapedWatch[], newScrapedW
   for (const watch of newScrapedWatches) {
     // TODO: Ska inte try catch täcka hela compareStoredWithScraped?
     try {
+      // TODO: Bryt ut till en egen funktion för att undvika djup nestling
       await sendWatchNotification(getEmailText(watch));
 
       infoLogger.info({ message: "Email sent." });
       // Skriv till databas (skapa tabell) om när ett mail skickades.
 
       // Vänta 5 sekunder mellan varje mail.
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5_000));
     } catch (err) {
       await sendErrorNotification(err);
       errorLogger.error({
@@ -105,5 +157,6 @@ async function handleNewScrapedWatch(scrapedWatches: ScrapedWatch[], newScrapedW
   }
 }
 
-const getEmailText = (newScrapedWatch: ScrapedWatch) =>
-  `${newScrapedWatch.name}\n\nLänk: ${newScrapedWatch.link}\n\nDetta mail skickades: ${time()}`;
+function getEmailText(newScrapedWatch: ScrapedWatch) {
+  return `${newScrapedWatch.name}\n\nLänk: ${newScrapedWatch.link}\n\nDetta mail skickades: ${time()}`;
+}

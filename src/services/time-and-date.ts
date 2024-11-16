@@ -1,14 +1,11 @@
-// @deno-types="npm:@types/luxon@^3.4.2"
-import { DateTime } from "npm:luxon@^3.5.0";
-
-// Tabell över format: https://moment.github.io/luxon/#/formatting
+import { format } from "jsr:@std/datetime";
 
 /** Format: yyyy-MM-dd hh:mm:ss */
 export function dateAndTime() {
-  return DateTime.now().toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS);
+  return format(new Date(), "yyyy-MM-dd HH:mm:ss");
 }
 
 /** Format: hh:mm:ss */
 export function time() {
-  return DateTime.now().toLocaleString(DateTime.TIME_24_WITH_SECONDS);
+  return format(new Date(), "HH:mm:ss");
 }

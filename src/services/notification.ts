@@ -1,5 +1,5 @@
 // @deno-types="npm:@types/nodemailer"^6.4.16"
-import { createTransport } from "npm:nodemailer@^6.9.15";
+import { createTransport } from "@nodemailer";
 import "jsr:@std/dotenv/load";
 
 const emailConfig = {
@@ -19,6 +19,7 @@ const transporter = createTransport({
 });
 
 export async function sendWatchNotification(emailText: string) {
+  // TODO: Det här finns inte i deno
   if (Deno.env.get("NODE_ENV") === "develop") {
     return;
   }
@@ -32,6 +33,7 @@ export async function sendWatchNotification(emailText: string) {
 }
 
 export async function sendErrorNotification(err: unknown) {
+  // TODO: Det här finns inte i deno
   if (Deno.env.get("NODE_ENV") === "develop") {
     return;
   }

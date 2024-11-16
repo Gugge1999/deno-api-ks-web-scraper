@@ -1,4 +1,3 @@
-import type { DateTime } from "npm:@types/luxon@^3.4.2";
 import { ScrapedWatch } from "./scraped-watches.ts";
 
 export interface Watch {
@@ -8,5 +7,5 @@ export interface Watch {
   watches: ScrapedWatch[];
   active: boolean;
   lastEmailSent: Date | null;
-  added: DateTime;
+  added: Date;
 }

@@ -1,5 +1,0 @@
-//    "@config/": "./src/config/",
-//    "@models/": "./src/models/",
-//    "@routes/": "./src/routes/",
-//    "@services/": "./src/services/",
-//    "@entity/": "./src/entity/"

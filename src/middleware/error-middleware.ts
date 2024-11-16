@@ -4,12 +4,11 @@ import { errorLogger } from "../services/logger.ts";
 const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
   try {
     await next();
-    // TODO: Byt från any sen
-  } catch (err: any) {
+  } catch (err: unknown) {
     // TODO: Lägg till verbose error message här?
     const message = err && typeof err === "object" && "message" in err ? err.message : "Något gick fel";
-    const status = err.status || err.statusCode || Status.InternalServerError;
-    const stack = err.stack ?? "";
+    const stack = err && typeof err === "object" && "stack" in err ? err.stack : "";
+    const status = getErrorStatus(err);
 
     errorLogger.error({
       message: message,
@@ -17,8 +16,24 @@ const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
     });
 
     ctx.response.status = status;
-    ctx.response.body = { status, message, stack };
+    ctx.response.body = {
+      status,
+      message,
+      stack,
+    };
   }
 };
+
+function getErrorStatus(err: unknown): number {
+  if (err && typeof err === "object" && "status" in err && typeof err.status === "number") {
+    return err.status;
+  }
+
+  if (err && typeof err === "object" && "statusCode" in err && typeof err.statusCode === "number") {
+    return err.statusCode;
+  }
+
+  return Status.InternalServerError;
+}
 
 export default errorMiddleware;

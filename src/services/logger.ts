@@ -1,4 +1,4 @@
-import { createLogger, format, transports } from "npm:winston@^3.15.0";
+import { createLogger, format, transports } from "@winston";
 
 const { combine, timestamp, prettyPrint, errors, printf } = format;
 
@@ -11,7 +11,7 @@ const customFormat = format.combine(
 
 export const errorLogger = createLogger({
   format: combine(
-    errors({ stack: true }), // <-- use errors format
+    errors({ stack: true }),
     timestamp({ format: timeFormat }),
     prettyPrint(),
   ),
