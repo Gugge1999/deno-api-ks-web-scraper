@@ -5,6 +5,7 @@ import { intervalInMin } from "../config/config.ts";
 
 const apiStatusRoutes = new Router();
 
+// TODO: Byt till deno webSocket
 apiStatusRoutes.get("/api-status", (context) => {
   const uptime: ApiStatus = {
     active: true,

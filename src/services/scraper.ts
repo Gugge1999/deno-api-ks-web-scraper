@@ -1,14 +1,14 @@
 // @deno-types="npm:@types/cheerio@^0.22.35"
 import { load } from "@cheerio";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
-import { ApiErrorDto } from "../models/api-error.dto.ts";
 import { dateAndTime, time } from "./time-and-date.ts";
 import { sendErrorNotification, sendWatchNotification } from "./notification.ts";
 import { errorLogger, infoLogger } from "./logger.ts";
 import { getAllActiveWatches, updateStoredWatches } from "./db.ts";
 import { intervalInMs } from "../config/config.ts";
+import { Watch } from "../models/watch.ts";
 
-export async function scrapeWatchInfo(watchToScrape: string): Promise<{ result: ScrapedWatch[] | null; error: string | null }> {
+export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatchInfoRes> {
   let response: Response;
 
   try {
@@ -35,7 +35,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<{ result: 
   if ($(contentRowTitleClass).length === 0) {
     return {
       result: null,
-      error: "Watch name yielded no results",
+      error: "Klocka gav 0 resultat. Försök igen med ny klocka",
     };
   }
 
@@ -112,7 +112,7 @@ export async function compareStoredWithScraped() {
   for (const watch of storedActiveWatches) {
     const storedWatchRow = watch;
 
-    const storedWatches = storedWatchRow.watches;
+    const storedWatches: ScrapedWatch[] = JSON.parse(storedWatchRow.watches);
 
     const scrapedWatches = await scrapeWatchInfo(storedWatchRow.watchToScrape);
 
@@ -142,26 +142,33 @@ async function handleNewScrapedWatch(scrapedWatches: ScrapedWatch[], newScrapedW
 
   // Loopa över varje ny klocka och skicka mail
   for (const watch of newScrapedWatches) {
-    // TODO: Ska inte try catch täcka hela compareStoredWithScraped?
-    try {
-      // TODO: Bryt ut till en egen funktion för att undvika djup nestling
-      await sendWatchNotification(getEmailText(watch));
+    await sendEmailNotification(watch);
+  }
+}
 
-      infoLogger.info({ message: "Email sent." });
-      // Skriv till databas (skapa tabell) om när ett mail skickades.
+async function sendEmailNotification(watch: ScrapedWatch) {
+  try {
+    await sendWatchNotification(getEmailText(watch));
 
-      // Vänta 5 sekunder mellan varje mail.
-      await new Promise((resolve) => setTimeout(resolve, 5_000));
-    } catch (err) {
-      await sendErrorNotification(err);
-      errorLogger.error({
-        message: "Function sendWatchNotification failed.",
-        stacktrace: err,
-      });
-    }
+    infoLogger.info({ message: "Email sent." });
+    // Skriv till databas (skapa tabell) om när ett mail skickades.
+
+    // Vänta 5 sekunder mellan varje mail.
+    await new Promise((resolve) => setTimeout(resolve, 5_000));
+  } catch (err) {
+    await sendErrorNotification(err);
+    errorLogger.error({
+      message: "Function sendWatchNotification failed.",
+      stacktrace: err,
+    });
   }
 }
 
 function getEmailText(newScrapedWatch: ScrapedWatch) {
   return `${newScrapedWatch.name}\n\nLänk: ${newScrapedWatch.link}\n\nDetta mail skickades: ${time()}`;
+}
+
+interface ScrapeWatchInfoRes {
+  result: ScrapedWatch[] | null;
+  error: string | null;
 }

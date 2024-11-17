@@ -9,6 +9,8 @@ import { ScrapedWatch } from "../models/scraped-watches.ts";
 const scraperRoutes = new Router();
 
 function createWatchDtoObj(watchDbModel: Watch) {
+  const watches: ScrapedWatch[] = JSON.parse(watchDbModel.watches);
+
   const dto: WatchDto = {
     id: watchDbModel.id,
     active: watchDbModel.active,
@@ -16,7 +18,11 @@ function createWatchDtoObj(watchDbModel: Watch) {
     label: watchDbModel.label,
     lastEmailSent: watchDbModel.lastEmailSent,
     watchToScrape: watchDbModel.watchToScrape,
-    watch: watchDbModel.watches[0],
+    watch: {
+      postedDate: watches[0].postedDate,
+      link: watches[0].link,
+      name: watches[0].name,
+    },
   };
 
   return dto;
@@ -33,7 +39,6 @@ scraperRoutes
     const returnDto: WatchDto[] = [];
     if (allWatches.result && allWatches.result.length > 0) {
       for (const scrapedWatch of allWatches.result) {
-        // TODO: Den här fungerar inte med nya insert i kolumn watches
         const dto = createWatchDtoObj(scrapedWatch);
         returnDto.push(dto);
       }
@@ -103,10 +108,10 @@ scraperRoutes
     const scrapedWatches = await scrapeWatchInfo(watchToScrape);
 
     if (scrapedWatches.error || scrapedWatches.result === null) {
-      throw new httpErrors.BadRequest("Klockan gav 0 resultat. Försök igen my ny klocka");
+      throw new httpErrors.BadRequest(scrapedWatches.error ?? "");
     }
 
-    const newWatch = await saveWatch(label, watchToScrape, JSON.stringify(scrapedWatches.result));
+    const newWatch = await saveWatch(label, watchToScrape, scrapedWatches.result);
 
     if (newWatch.error || newWatch.result === null) {
       throw new httpErrors.InternalServerError("Kunde inte spara ny bevakning");
