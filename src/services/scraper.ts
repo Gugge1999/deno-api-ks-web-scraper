@@ -6,7 +6,6 @@ import { sendErrorNotification, sendWatchNotification } from "./notification.ts"
 import { errorLogger, infoLogger } from "./logger.ts";
 import { getAllActiveWatches, updateStoredWatches } from "./db.ts";
 import { intervalInMs } from "../config/config.ts";
-import { Watch } from "../models/watch.ts";
 
 export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatchInfoRes> {
   let response: Response;
@@ -150,13 +149,14 @@ async function sendEmailNotification(watch: ScrapedWatch) {
   try {
     await sendWatchNotification(getEmailText(watch));
 
-    infoLogger.info({ message: "Email sent." });
+    infoLogger.info({ message: `Email sent with watch: ${watch}` });
     // Skriv till databas (skapa tabell) om när ett mail skickades.
 
     // Vänta 5 sekunder mellan varje mail.
     await new Promise((resolve) => setTimeout(resolve, 5_000));
   } catch (err) {
     await sendErrorNotification(err);
+
     errorLogger.error({
       message: "Function sendWatchNotification failed.",
       stacktrace: err,
