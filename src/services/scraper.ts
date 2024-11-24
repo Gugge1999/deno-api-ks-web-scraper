@@ -4,7 +4,7 @@ import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { currentDateAndTime, currentTime } from "./time-and-date.ts";
 import { sendErrorNotification, sendWatchNotification } from "./notification.ts";
 import { errorLogger, infoLogger } from "./logger.ts";
-import { getAllActiveWatches, updateStoredWatches } from "./db.ts";
+import { getAllActiveWatches, updateStoredWatches } from "./database.ts";
 import { INTERVAL_IN_MS } from "../config/config.ts";
 
 export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatchInfoRes> {
