@@ -8,6 +8,8 @@ import { ScrapedWatch } from "../models/scraped-watches.ts";
 
 const scraperRoutes = new Router();
 
+const BEVAKNINGAR_BASE_URL = "/api/bevakningar";
+
 function createWatchDtoObj(watchDbModel: Watch) {
   const watches: ScrapedWatch[] = JSON.parse(watchDbModel.watches);
 
@@ -29,7 +31,7 @@ function createWatchDtoObj(watchDbModel: Watch) {
 }
 
 scraperRoutes
-  .get("/all-watches", async (context) => {
+  .get(`${BEVAKNINGAR_BASE_URL}/all-watches`, async (context) => {
     const allWatches = await getAllWatches();
 
     if (allWatches.error) {
@@ -46,7 +48,7 @@ scraperRoutes
 
     context.response.body = returnDto;
   })
-  .delete("/delete-watch/:id", async (context) => {
+  .delete(`${BEVAKNINGAR_BASE_URL}/delete-watch/:id`, async (context) => {
     if (!context?.params?.id || !validate(context?.params?.id)) {
       throw new httpErrors.UnprocessableEntity("Ogiltigt id för bevakning");
     }
@@ -59,7 +61,7 @@ scraperRoutes
 
     context.response.body = { deleteWatchId: context.params.id };
   })
-  .put("/toggle-active-status", async (context) => {
+  .put(`${BEVAKNINGAR_BASE_URL}/toggle-active-status`, async (context) => {
     /** TODO:
      * WARNING* this is an unreliable API. In HTTP/ 2 in many situations you cannot
      * determine if a request has a body or not unless you attempt to read the body, due
@@ -88,7 +90,7 @@ scraperRoutes
 
     context.response.body = response;
   })
-  .post("/save-watch", async (context) => {
+  .post(`${BEVAKNINGAR_BASE_URL}/save-watch`, async (context) => {
     /** TODO:
      * WARNING* this is an unreliable API. In HTTP/ 2 in many situations you cannot
      * determine if a request has a body or not unless you attempt to read the body, due

@@ -2,17 +2,17 @@ import { createLogger, format, transports } from "@winston";
 
 const { combine, timestamp, prettyPrint, errors, printf } = format;
 
-const timeFormat = "HH:mm:ss YYYY-MM-DD";
+const TIME_FORMAT_LOGGER = "HH:mm:ss YYYY-MM-DD";
 
 const customFormat = format.combine(
-  timestamp({ format: timeFormat }),
+  timestamp({ format: TIME_FORMAT_LOGGER }),
   printf((info) => `${info.message} [${info.timestamp}]`),
 );
 
 export const errorLogger = createLogger({
   format: combine(
     errors({ stack: true }),
-    timestamp({ format: timeFormat }),
+    timestamp({ format: TIME_FORMAT_LOGGER }),
     prettyPrint(),
   ),
   exitOnError: false,

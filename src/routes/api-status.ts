@@ -1,15 +1,17 @@
 import type { ApiStatus } from "../models/status.dto.ts";
 import { formatBytes, getUptime } from "../services/status.ts";
 import { Router } from "@oak/oak";
-import { intervalInMin } from "../config/config.ts";
+import { INTERVAL_IN_MIN } from "../config/config.ts";
 
 const apiStatusRoutes = new Router();
 
+const STATUS_BASE_URL = "/api";
+
 // TODO: Byt till deno webSocket
-apiStatusRoutes.get("/api-status", (context) => {
+apiStatusRoutes.get(`${STATUS_BASE_URL}/api-status`, (context) => {
   const uptime: ApiStatus = {
     active: true,
-    scrapingIntervalInMinutes: intervalInMin,
+    scrapingIntervalInMinutes: INTERVAL_IN_MIN,
     memoryUsage: formatBytes(Deno.memoryUsage().rss, 0),
     uptime: getUptime(),
   };

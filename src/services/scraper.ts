@@ -1,11 +1,11 @@
 // @deno-types="npm:@types/cheerio@^0.22.35"
 import { load } from "@cheerio";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
-import { dateAndTime, time } from "./time-and-date.ts";
+import { currentDateAndTime, currentTime } from "./time-and-date.ts";
 import { sendErrorNotification, sendWatchNotification } from "./notification.ts";
 import { errorLogger, infoLogger } from "./logger.ts";
 import { getAllActiveWatches, updateStoredWatches } from "./db.ts";
-import { intervalInMs } from "../config/config.ts";
+import { INTERVAL_IN_MS } from "../config/config.ts";
 
 export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatchInfoRes> {
   let response: Response;
@@ -28,10 +28,10 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
 
   const $ = load(body);
 
-  const contentRowTitleClass = ".contentRow-title";
+  const CONTENT_ROW_TITLE_CLASS = ".contentRow-title";
 
   // Länken gav inga resultat.
-  if ($(contentRowTitleClass).length === 0) {
+  if ($(CONTENT_ROW_TITLE_CLASS).length === 0) {
     return {
       result: null,
       error: "Klocka gav 0 resultat. Försök igen med ny klocka",
@@ -43,7 +43,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   const links: string[] = [];
 
   // Titel
-  $(contentRowTitleClass)
+  $(CONTENT_ROW_TITLE_CLASS)
     .get()
     .map((element: any) => {
       return titles.push(
@@ -70,7 +70,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
 
   // Länk
   // TODO: Ska element vara av typen Element?
-  $(contentRowTitleClass)
+  $(CONTENT_ROW_TITLE_CLASS)
     .get()
     .map((element: any) => links.push(`https://klocksnack.se${$(element).find("a").attr("href")}`));
 
@@ -102,10 +102,10 @@ export async function compareStoredWithScraped() {
   const storedActiveWatches = getAllWatchesDbRes.result;
 
   if (storedActiveWatches.length === 0) {
-    console.log(`No active watches @ ${dateAndTime()}`);
+    console.log(`No active watches @ ${currentDateAndTime()}`);
   } else {
     const length = storedActiveWatches.length;
-    console.log(`Scraping ${length} ${length === 1 ? "watch" : "watches"} @ ${dateAndTime()}`);
+    console.log(`Scraping ${length} ${length === 1 ? "watch" : "watches"} @ ${currentDateAndTime()}`);
   }
 
   for (const watch of storedActiveWatches) {
@@ -132,7 +132,7 @@ export async function compareStoredWithScraped() {
     }
   }
 
-  setTimeout(compareStoredWithScraped, intervalInMs);
+  setTimeout(compareStoredWithScraped, INTERVAL_IN_MS);
 }
 
 async function handleNewScrapedWatch(scrapedWatches: ScrapedWatch[], newScrapedWatches: ScrapedWatch[], storedWatchRowId: string) {
@@ -165,7 +165,7 @@ async function sendEmailNotification(watch: ScrapedWatch) {
 }
 
 function getEmailText(newScrapedWatch: ScrapedWatch) {
-  return `${newScrapedWatch.name}\n\nLänk: ${newScrapedWatch.link}\n\nDetta mail skickades: ${time()}`;
+  return `${newScrapedWatch.name}\n\nLänk: ${newScrapedWatch.link}\n\nDetta mail skickades: ${currentTime()}`;
 }
 
 interface ScrapeWatchInfoRes {

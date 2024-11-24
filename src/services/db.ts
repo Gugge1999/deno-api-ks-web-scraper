@@ -22,7 +22,7 @@ interface DbResponse<T> {
   error: unknown;
 }
 
-export async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
+async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
   try {
     const result = await query;
 
