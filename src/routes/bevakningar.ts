@@ -1,5 +1,5 @@
 import { httpErrors, Router } from "@oak/oak";
-import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus } from "../services/database.ts";
+import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus } from "../services/database/watch.ts";
 import { validate } from "jsr:@std/uuid";
 import { WatchDto } from "../models/watch-dto.ts";
 import { Watch } from "../models/watch.ts";

@@ -1,7 +1,7 @@
 import type { ApiStatus } from "../models/status.dto.ts";
 import { formatBytes, getUptime } from "../services/status.ts";
 import { Router } from "@oak/oak";
-import { INTERVAL_IN_MIN } from "../config/config.ts";
+import { INTERVAL_IN_MIN } from "../constants/config.ts";
 
 const apiStatusRoutes = new Router();
 

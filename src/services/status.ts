@@ -23,8 +23,7 @@ export function getUptime(): DurationObjectUnits {
 
   return {
     ...uptimeObj,
-    // Avrunda decimaler, default är väldigt många
-    seconds: Math.round(uptimeObj.seconds ?? 0),
+    seconds: Math.round(uptimeObj.seconds ?? 0), // Radera decimaler
   };
 }
 
@@ -35,7 +34,7 @@ export function formatBytes(bytes: number, decimals: number) {
 
   const oneKb = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes: ReadonlyArray<string> = ["Bytes", "kB", "MB", "GB"];
+  const sizes: readonly string[] = ["Bytes", "kB", "MB", "GB"];
 
   const i = Math.floor(Math.log(bytes) / Math.log(oneKb));
 
