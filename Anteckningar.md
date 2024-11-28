@@ -3,6 +3,7 @@
 * Lägg till github actions
 
 
+Byt alla tabeller till underscore _ i namnet
 
 
 # Dokumentation
