@@ -21,7 +21,7 @@ apiStatusRoutes.get(`${STATUS_BASE_URL}/api-status-old`, (context) => {
 
 const router = new Router();
 
-type WebSocketWithUsername = WebSocket & { username: string };
+type WebSocketWithUsername = WebSocket;
 type AppEvent = { event: string; [key: string]: any };
 
 class ChatServer {
@@ -31,46 +31,20 @@ class ChatServer {
     const socket = ctx.upgrade() as WebSocketWithUsername;
     const username = ctx.request.url.searchParams.get("username") ?? "";
 
-    if (this.connectedClients.has(username)) {
-      socket.close(1008, `Username ${username} is already taken`);
-      return;
-    }
-
-    socket.username = username;
     socket.onopen = this.broadcastApiStatus.bind(this);
     socket.onclose = () => {
-      this.clientDisconnected(socket.username);
+      console.log(`Client disconnected`);
     };
-    socket.onmessage = (m) => {
-      this.send(socket.username, m);
-    };
+
     this.connectedClients.set(username, socket);
 
     console.log(`New client connected: ${username}`);
   }
 
-  private send(username: string, message: any) {
-    const data = JSON.parse(message.data);
-    if (data.event !== "send-message") {
-      return;
-    }
-
-    this.broadcast({
-      event: "send-message",
-      username: username,
-      message: data.message,
-    });
-  }
-
-  private clientDisconnected(username: string) {
-    this.connectedClients.delete(username);
-    console.log(`Client ${username} disconnected`);
-  }
-
   private broadcastApiStatus() {
     this.broadcast({ event: "update-users", apiStatus: this.getApiStatus() });
 
-    setInterval(() => this.broadcast({ event: "update-users", apiStatus: this.getApiStatus() }), 5000);
+    setInterval(() => this.broadcast({ event: "update-users", apiStatus: this.getApiStatus() }), 2_000);
   }
 
   private broadcast(message: AppEvent) {
