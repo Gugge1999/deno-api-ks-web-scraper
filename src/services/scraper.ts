@@ -76,7 +76,6 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
 
   const scrapedWatches: ScrapedWatch[] = [];
 
-  // TODO: Behöver det vara index?
   titles.forEach((_, index) => {
     const currentWatchInfo: ScrapedWatch = {
       name: titles[index],
@@ -99,14 +98,13 @@ export async function compareStoredWithScraped() {
     return;
   }
 
-  const storedActiveWatches = getAllWatchesDbRes.result;
-
-  const activeWatchesLen = storedActiveWatches.length;
+  const activeWatchesLen = getAllWatchesDbRes.result.length;
 
   activeWatchesLen === 0
     ? console.log(`No active watches @ ${currentDateAndTime()}`)
     : console.log(`Scraping ${activeWatchesLen} ${activeWatchesLen === 1 ? "watch" : "watches"} @ ${currentDateAndTime()}`);
 
+  const storedActiveWatches = getAllWatchesDbRes.result;
   for (const watch of storedActiveWatches) {
     const storedWatch = watch;
 
@@ -121,22 +119,21 @@ export async function compareStoredWithScraped() {
     // Vänta 1 sekund mellan varje anrop till KS
     await new Promise((resolve) => setTimeout(resolve, 1_000));
 
-    const newScrapedWatches = scrapedWatches.result.filter(({ postedDate: a }: { postedDate: string }) => {
+    const intersectingNewScrapedWatches = scrapedWatches.result.filter(({ postedDate: a }: { postedDate: string }) => {
       return !storedWatches.some(({ postedDate: b }: { postedDate: string }) => b === a);
     });
 
-    if (newScrapedWatches.length > 0) {
+    if (intersectingNewScrapedWatches.length > 0) {
       // TODO: Ska den returnera result och error för att inte skicka mails till användare när något går fel=
       await updateStoredWatches(scrapedWatches.result, storedWatch.id);
 
-      await handleNewScrapedWatch(newScrapedWatches);
+      await handleNewScrapedWatch(intersectingNewScrapedWatches);
     }
   }
 }
 
 setInterval(compareStoredWithScraped, INTERVAL_IN_MS);
 
-// TODO: Byt till bättre namn på parameters
 async function handleNewScrapedWatch(newScrapedWatches: ScrapedWatch[]) {
   // Loopa över varje ny klocka och skicka mail
   for (const watch of newScrapedWatches) {

@@ -10,26 +10,6 @@ const scraperRoutes = new Router();
 
 const BEVAKNINGAR_BASE_URL = "/api/bevakningar";
 
-function createWatchDtoObj(watchDbModel: Watch) {
-  const watches: ScrapedWatch[] = JSON.parse(watchDbModel.watches);
-
-  const dto: WatchDto = {
-    id: watchDbModel.id,
-    active: watchDbModel.active,
-    added: watchDbModel.added,
-    label: watchDbModel.label,
-    lastEmailSent: watchDbModel.lastEmailSent,
-    watchToScrape: watchDbModel.watchToScrape,
-    watch: {
-      postedDate: watches[0].postedDate,
-      link: watches[0].link,
-      name: watches[0].name,
-    },
-  };
-
-  return dto;
-}
-
 scraperRoutes
   .get(`${BEVAKNINGAR_BASE_URL}/all-watches`, async (context) => {
     const allWatches = await getAllWatches();
@@ -41,7 +21,7 @@ scraperRoutes
     const returnDto: WatchDto[] = [];
     if (allWatches.result && allWatches.result.length > 0) {
       for (const scrapedWatch of allWatches.result) {
-        const dto = createWatchDtoObj(scrapedWatch);
+        const dto = createWatchDto(scrapedWatch);
         returnDto.push(dto);
       }
     }
@@ -139,5 +119,25 @@ scraperRoutes
 
     context.response.body = returnDto;
   });
+
+function createWatchDto(watchDbModel: Watch) {
+  const watches: ScrapedWatch[] = JSON.parse(watchDbModel.watches);
+
+  const dto: WatchDto = {
+    id: watchDbModel.id,
+    active: watchDbModel.active,
+    added: watchDbModel.added,
+    label: watchDbModel.label,
+    lastEmailSent: watchDbModel.lastEmailSent,
+    watchToScrape: watchDbModel.watchToScrape,
+    watch: {
+      postedDate: watches[0].postedDate,
+      link: watches[0].link,
+      name: watches[0].name,
+    },
+  };
+
+  return dto;
+}
 
 export default scraperRoutes;

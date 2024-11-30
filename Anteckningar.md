@@ -20,7 +20,7 @@
 
 # Dokumentation
 
-* Docs för [porsager / postgres](https://github.com/porsager/postgres)
+* Docs för [porsager/postgres](https://github.com/porsager/postgres)
 
 
 * Bra repo att kolla på: [deno api starter oak](https://github.com/asad-mlbd/deno-api-starter-oak)
