@@ -30,9 +30,9 @@ export function saveWatch(label: string, watchToScrape: string, scrapedWatches: 
 
   const newWatchQuery = sql<Watch[]>`
     INSERT INTO watch(label, "watchToScrape", active,  watches)
-    VALUES
-    (${label}, ${watchToScrape}, ${true}, ${JSON.stringify(scrapedWatches)})
-    RETURNING *`;
+        VALUES
+            (${label}, ${watchToScrape}, ${true}, ${JSON.stringify(scrapedWatches)})
+                RETURNING *`;
 
   return runDbQuery(newWatchQuery);
 }

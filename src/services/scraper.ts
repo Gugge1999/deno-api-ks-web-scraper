@@ -149,7 +149,7 @@ async function sendEmailNotification(watch: ScrapedWatch) {
   try {
     await sendWatchNotification(getEmailText(watch));
 
-    infoLogger.info({ message: `Email sent with watch: ${watch}` });
+    infoLogger.info({ message: `Email sent with watch: ${JSON.stringify(watch)}` });
     // Skriv till databas (skapa tabell) om när ett mail skickades.
 
     // Vänta 5 sekunder mellan varje mail.

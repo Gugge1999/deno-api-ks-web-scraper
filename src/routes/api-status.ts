@@ -2,60 +2,44 @@ import type { ApiStatus } from "../models/status.dto.ts";
 import { formatBytes, getUptime } from "../services/status.ts";
 import { Context, Router } from "@oak/oak";
 import { INTERVAL_IN_MIN } from "../constants/config.ts";
-import { currentTime } from "../services/time-and-date.ts";
+
+const apiStatusRoutes = new Router();
+const connectedClients = new Map<string, WebSocket>();
 
 const STATUS_BASE_URL = "/api";
 
-const apiStatusRoutes = new Router();
+apiStatusRoutes.get(`${STATUS_BASE_URL}/api-status`, (ctx: Context) => {
+  const socket = ctx.upgrade();
+  const username = ctx.request.url.searchParams.get("username") ?? "default-username";
 
-type WebSocketWithUsername = WebSocket;
+  socket.onclose = (socket) => {
+    console.log("socket", socket);
+    connectedClients.delete(username);
+    console.log(`\nClient ${username} disconnected!`);
+  };
 
-// TODO: Byt från class till funktion
-class ChatServer {
-  private connectedClients = new Map<string, WebSocketWithUsername>();
+  connectedClients.set(username, socket);
 
-  public handleConnection(ctx: Context) {
-    const socket = ctx.upgrade() as WebSocketWithUsername;
-    const username = ctx.request.url.searchParams.get("username") ?? "default-username";
+  socket.onopen = () => broadcastApiStatus();
+});
 
-    socket.onopen = this.broadcastApiStatus.bind(this);
-    socket.onclose = () => {
-      this.connectedClients.delete(username);
-      console.log(`Client ${username} disconnected`);
-    };
+function broadcastApiStatus() {
+  const apiStatus = getApiStatus();
 
-    this.connectedClients.set(username, socket);
-
-    console.log(`New client connected: ${username}`);
-  }
-
-  private broadcastApiStatus() {
-    this.broadcast(this.getApiStatus());
-
-    setTimeout(() => this.broadcastApiStatus(), 5_000);
-  }
-
-  private broadcast(apiStatus: ApiStatus) {
-    this.connectedClients.forEach((client) => {
-      console.log("client", client);
-      client.send(JSON.stringify(apiStatus));
-    });
-  }
-
-  private getApiStatus(): ApiStatus {
-    console.log(`total users: ${this.connectedClients.size} @ ${currentTime()}`);
-
-    return {
-      active: true,
-      scrapingIntervalInMinutes: INTERVAL_IN_MIN,
-      memoryUsage: formatBytes(Deno.memoryUsage().rss, 0),
-      uptime: getUptime(),
-    };
-  }
+  connectedClients.forEach((client) => {
+    client.send(JSON.stringify(apiStatus));
+  });
 }
 
-const server = new ChatServer();
+const getApiStatus = (): ApiStatus => ({
+  status: "active",
+  scrapingIntervalInMinutes: INTERVAL_IN_MIN,
+  memoryUsage: formatBytes(Deno.memoryUsage().rss, 0),
+  uptime: getUptime(),
+});
 
-apiStatusRoutes.get(`${STATUS_BASE_URL}/api-status`, (ctx: Context) => server.handleConnection(ctx));
+setInterval(() => {
+  broadcastApiStatus();
+}, 5_000);
 
 export default apiStatusRoutes;

@@ -23,7 +23,7 @@ export function getUptime(): DurationObjectUnits {
 
   return {
     ...uptimeObj,
-    seconds: Math.round(uptimeObj.seconds ?? 0), // Radera decimaler
+    seconds: Math.floor(uptimeObj.seconds ?? 0), // Radera decimaler
   };
 }
 
