@@ -6,8 +6,6 @@ import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
 import { compareStoredWithScraped } from "./services/scraper.ts";
 
-// Kolla på https://github.com/asad-mlbd/deno-api-starter-oak
-
 const app = new Application();
 
 app.use(oakCors());

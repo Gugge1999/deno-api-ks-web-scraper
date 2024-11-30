@@ -11,14 +11,12 @@ const STATUS_BASE_URL = "/api";
 apiStatusRoutes.get(`${STATUS_BASE_URL}/api-status`, (ctx: Context) => {
   const socket = ctx.upgrade();
   const username = ctx.request.url.searchParams.get("username") ?? "default-username";
+  connectedClients.set(username, socket);
 
-  socket.onclose = (socket) => {
-    console.log("socket", socket);
+  socket.onclose = () => {
     connectedClients.delete(username);
     console.log(`\nClient ${username} disconnected!`);
   };
-
-  connectedClients.set(username, socket);
 
   socket.onopen = () => broadcastApiStatus();
 });

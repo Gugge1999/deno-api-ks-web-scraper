@@ -5,7 +5,6 @@ import { WatchDto } from "../models/watch-dto.ts";
 import { Watch } from "../models/watch.ts";
 import { scrapeWatchInfo } from "../services/scraper.ts";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
-import { insertNewNotification } from "../services/database/notification.ts";
 
 const scraperRoutes = new Router();
 
@@ -119,8 +118,6 @@ scraperRoutes
     if (newWatch.error || newWatch.result === null) {
       throw new httpErrors.InternalServerError("Kunde inte spara ny bevakning");
     }
-
-    await insertNewNotification(newWatch.result[0].id);
 
     const dbRes = newWatch.result[0];
 

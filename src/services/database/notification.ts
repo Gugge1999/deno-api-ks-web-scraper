@@ -1,13 +1,13 @@
 // TODO: Kom ihåg att lägga till notification i migration
-import { runDbQuery, sql } from "./query.ts";
+import { sql } from "./query.ts";
+import { Notification } from "../../models/notification.ts";
 
 export function insertNewNotification(watchId: string) {
   // TODO: Kom ihåg att lägga till clock_timestamp() i postgres migration
 
-  const newNotificationQuery = sql`
+  return sql<Notification[]>`
     INSERT INTO notification("watchId")
-    VALUES
-    (${watchId})`;
-
-  return runDbQuery(newNotificationQuery);
+        VALUES
+            (${watchId})
+                RETURNING *`;
 }

@@ -101,19 +101,18 @@ export async function compareStoredWithScraped() {
 
   const storedActiveWatches = getAllWatchesDbRes.result;
 
-  if (storedActiveWatches.length === 0) {
-    console.log(`No active watches @ ${currentDateAndTime()}`);
-  } else {
-    const length = storedActiveWatches.length;
-    console.log(`Scraping ${length} ${length === 1 ? "watch" : "watches"} @ ${currentDateAndTime()}`);
-  }
+  const activeWatchesLen = storedActiveWatches.length;
+
+  activeWatchesLen === 0
+    ? console.log(`No active watches @ ${currentDateAndTime()}`)
+    : console.log(`Scraping ${activeWatchesLen} ${activeWatchesLen === 1 ? "watch" : "watches"} @ ${currentDateAndTime()}`);
 
   for (const watch of storedActiveWatches) {
-    const storedWatchRow = watch;
+    const storedWatch = watch;
 
-    const storedWatches: ScrapedWatch[] = JSON.parse(storedWatchRow.watches);
+    const storedWatches: ScrapedWatch[] = JSON.parse(storedWatch.watches);
 
-    const scrapedWatches = await scrapeWatchInfo(storedWatchRow.watchToScrape);
+    const scrapedWatches = await scrapeWatchInfo(storedWatch.watchToScrape);
 
     if (scrapedWatches.error || scrapedWatches.result === null) {
       return;
@@ -122,23 +121,23 @@ export async function compareStoredWithScraped() {
     // Vänta 1 sekund mellan varje anrop till KS
     await new Promise((resolve) => setTimeout(resolve, 1_000));
 
-    // TODO: Just nu jämförs de lagrade klockorna och de scrape:ade endast på postedDate. Är det unikt nog ?
     const newScrapedWatches = scrapedWatches.result.filter(({ postedDate: a }: { postedDate: string }) => {
       return !storedWatches.some(({ postedDate: b }: { postedDate: string }) => b === a);
     });
 
     if (newScrapedWatches.length > 0) {
-      await handleNewScrapedWatch(scrapedWatches.result, newScrapedWatches, storedWatchRow.id);
+      // TODO: Ska den returnera result och error för att inte skicka mails till användare när något går fel=
+      await updateStoredWatches(scrapedWatches.result, storedWatch.id);
+
+      await handleNewScrapedWatch(newScrapedWatches);
     }
   }
-
-  setTimeout(compareStoredWithScraped, INTERVAL_IN_MS);
 }
 
-async function handleNewScrapedWatch(scrapedWatches: ScrapedWatch[], newScrapedWatches: ScrapedWatch[], storedWatchRowId: string) {
-  // TODO: Ska det vara scrapedWatches eller newScrapedWatches?
-  updateStoredWatches(scrapedWatches, storedWatchRowId);
+setInterval(compareStoredWithScraped, INTERVAL_IN_MS);
 
+// TODO: Byt till bättre namn på parameters
+async function handleNewScrapedWatch(newScrapedWatches: ScrapedWatch[]) {
   // Loopa över varje ny klocka och skicka mail
   for (const watch of newScrapedWatches) {
     await sendEmailNotification(watch);
@@ -155,12 +154,12 @@ async function sendEmailNotification(watch: ScrapedWatch) {
     // Vänta 5 sekunder mellan varje mail.
     await new Promise((resolve) => setTimeout(resolve, 5_000));
   } catch (err) {
-    await sendErrorNotification(err);
-
     errorLogger.error({
       message: "Function sendWatchNotification failed.",
       stacktrace: err,
     });
+
+    await sendErrorNotification(err);
   }
 }
 
