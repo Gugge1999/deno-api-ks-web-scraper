@@ -3,6 +3,7 @@ import { httpErrors } from "@oak/oak";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { runDbQuery, sql } from "./query.ts";
 import { Notification } from "../models/notification.ts";
+import { errorLogger } from "../services/logger.ts";
 
 export function getAllWatches() {
   return runDbQuery(sql<Watch[]>`SELECT * FROM watch ORDER BY added`);
@@ -40,20 +41,32 @@ export function saveWatch(label: string, watchToScrape: string, scrapedWatches: 
 
 export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: string) {
   return await sql.begin(async (sql) => {
-    const watch = await sql<Watch[]>`
+    const [watch] = await sql<Watch[]>`
         UPDATE watch
             SET watches = (${JSON.stringify(newWatches)}), "lastEmailSent" = ${sql`now()`}
                 WHERE id = ${watchId}
                     RETURNING *`;
 
-    // TODO: Den kanske ska finnas an query för transaction i query.ts?
-    const notification = await sql<Notification[]>`
+    const [notification] = await sql<Notification[]>`
         INSERT INTO notification("watchId")
             VALUES
-                (${watchId}) // TODO: Testa med random guid och se att transaktion inte går igenom
+                (${watchId}) 
                      RETURNING *`;
 
-    return [watch, notification];
+    return {
+      result: [watch, notification],
+      error: null,
+    };
+  }).catch((err: unknown) => {
+    errorLogger.error({
+      message: "Transaktion för att uppdatera bevakning misslyckades.",
+      stacktrace: err,
+    });
+
+    return {
+      result: null,
+      error: err,
+    };
   });
 }
 

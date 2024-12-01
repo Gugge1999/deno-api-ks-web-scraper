@@ -124,8 +124,11 @@ export async function compareStoredWithScraped() {
     );
 
     if (intersectingNewScrapedWatches.length > 0) {
-      // TODO: Ska den returnera result och error för att inte skicka mails till användare när något går fel?
-      await updateStoredWatches(scrapedWatches.result, storedWatch.id);
+      const updateWatchRes = await updateStoredWatches(scrapedWatches.result, storedWatch.id);
+
+      if (updateWatchRes.error || updateWatchRes.result === null) {
+        return;
+      }
 
       await handleNewScrapedWatch(intersectingNewScrapedWatches);
     }

@@ -75,14 +75,16 @@ scraperRoutes
     if (label === undefined || watchToScrape === undefined) {
       throw new httpErrors.UnprocessableEntity("label och watchToScrape behöver finnas i body");
     }
+    const watchToScrapeLink =
+      `https://klocksnack.se/search/1/?q=${watchToScrape}&t=post&c[child_nodes]=1&c[nodes][0]=11&c[title_only]=1&o=date`;
 
-    const scrapedWatches = await scrapeWatchInfo(watchToScrape);
+    const scrapedWatches = await scrapeWatchInfo(watchToScrapeLink);
 
     if (scrapedWatches.error !== null || scrapedWatches.result === null) {
       throw new httpErrors.BadRequest(scrapedWatches.error ?? "");
     }
 
-    const newWatch = await saveWatch(label, watchToScrape, scrapedWatches.result);
+    const newWatch = await saveWatch(label, watchToScrapeLink, scrapedWatches.result);
 
     if (newWatch.error || newWatch.result === null) {
       throw new httpErrors.InternalServerError("Kunde inte spara ny bevakning");

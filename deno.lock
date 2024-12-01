@@ -28,6 +28,7 @@
     "npm:nodemailer@^6.9.15": "6.9.16",
     "npm:path-to-regexp@6.2.1": "6.2.1",
     "npm:postgres@3.4.5": "3.4.5",
+    "npm:winston@3.16.0": "3.16.0",
     "npm:winston@^3.15.0": "3.16.0"
   },
   "jsr": {
