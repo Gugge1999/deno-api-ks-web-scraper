@@ -1,5 +1,5 @@
 // @deno-types="npm:@types/luxon@^3.4.2"
-import { DateTime } from "@luxon";
+import { DateTime } from "luxon";
 import process from "node:process";
 import { DurationObjectUnits } from "npm:@types/luxon@3.4.2";
 

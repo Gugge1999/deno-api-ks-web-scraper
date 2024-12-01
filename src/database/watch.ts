@@ -1,8 +1,8 @@
-import { Watch } from "../../models/watch.ts";
+import { Watch } from "../models/watch.ts";
 import { httpErrors } from "@oak/oak";
-import { ScrapedWatch } from "../../models/scraped-watches.ts";
+import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { runDbQuery, sql } from "./query.ts";
-import { Notification } from "../../models/notification.ts";
+import { Notification } from "../models/notification.ts";
 
 export function getAllWatches() {
   return runDbQuery(sql<Watch[]>`SELECT * FROM watch ORDER BY added`);

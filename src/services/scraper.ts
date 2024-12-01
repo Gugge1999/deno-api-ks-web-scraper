@@ -1,10 +1,10 @@
 // @deno-types="npm:@types/cheerio@^0.22.35"
-import { load } from "@cheerio";
+import { load } from "cheerio";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { currentDateAndTime, currentTime } from "./time-and-date.ts";
 import { sendErrorNotification, sendWatchNotification } from "./notification.ts";
 import { errorLogger, infoLogger } from "./logger.ts";
-import { getAllActiveWatches, updateStoredWatches } from "./database/watch.ts";
+import { getAllActiveWatches, updateStoredWatches } from "../database/watch.ts";
 import { INTERVAL_IN_MS } from "../constants/config.ts";
 
 export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatchInfoRes> {
@@ -13,7 +13,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   try {
     response = await fetch(watchToScrape);
   } catch (err) {
-    const message = `Kunde inte hämta url url ${watchToScrape}`;
+    const message = `Kunde inte hämta url. Angiven url: ${watchToScrape}`;
 
     errorLogger.error({ message });
 
@@ -142,7 +142,7 @@ async function handleNewScrapedWatch(newScrapedWatches: ScrapedWatch[]) {
 
 async function sendEmailNotification(watch: ScrapedWatch) {
   try {
-    await sendWatchNotification(getEmailText(watch));
+    await sendWatchNotification(emailText(watch));
 
     infoLogger.info({ message: `Email sent with watch: ${JSON.stringify(watch)}` });
 
@@ -158,9 +158,7 @@ async function sendEmailNotification(watch: ScrapedWatch) {
   }
 }
 
-function getEmailText(newScrapedWatch: ScrapedWatch) {
-  return `${newScrapedWatch.name}\n\nLänk: ${newScrapedWatch.link}\n\nDetta mail skickades: ${currentTime()}`;
-}
+const emailText = (watch: ScrapedWatch) => `${watch.name}\n\nLänk: ${watch.link}\n\nDetta mail skickades: ${currentTime()}`;
 
 interface ScrapeWatchInfoRes {
   result: ScrapedWatch[] | null;

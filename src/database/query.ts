@@ -1,5 +1,5 @@
-import { errorLogger } from "../logger.ts";
-import postgres from "@postgres";
+import { errorLogger } from "../services/logger.ts";
+import postgres from "postgres";
 import "jsr:@std/dotenv/load";
 
 interface DbResponse<T> {
