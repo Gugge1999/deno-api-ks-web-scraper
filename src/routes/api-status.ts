@@ -8,14 +8,14 @@ const connectedClients = new Map<string, WebSocket>();
 
 const STATUS_BASE_URL = "/api";
 
-apiStatusRoutes.get(`${STATUS_BASE_URL}/api-status`, (ctx: Context) => {
-  const socket = ctx.upgrade();
-  const username = ctx.request.url.searchParams.get("username") ?? "default-username";
+apiStatusRoutes.get(`${STATUS_BASE_URL}/api-status`, (context: Context) => {
+  const socket = context.upgrade();
+  const username = context.request.url.searchParams.get("username") ?? "default-username";
   connectedClients.set(username, socket);
 
   socket.onclose = () => {
     connectedClients.delete(username);
-    console.log(`\nClient ${username} disconnected!`);
+    console.log(`Client ${username} disconnected!`);
   };
 
   socket.onopen = () => broadcastApiStatus();

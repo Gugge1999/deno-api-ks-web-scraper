@@ -98,11 +98,11 @@ export async function compareStoredWithScraped() {
     return;
   }
 
-  const activeWatchesLen = getAllWatchesDbRes.result.length;
+  const activeWatchesLength = getAllWatchesDbRes.result.length;
 
-  activeWatchesLen === 0
+  activeWatchesLength === 0
     ? console.log(`No active watches @ ${currentDateAndTime()}`)
-    : console.log(`Scraping ${activeWatchesLen} ${activeWatchesLen === 1 ? "watch" : "watches"} @ ${currentDateAndTime()}`);
+    : console.log(`Scraping ${activeWatchesLength} ${activeWatchesLength === 1 ? "watch" : "watches"} @ ${currentDateAndTime()}`);
 
   const storedActiveWatches = getAllWatchesDbRes.result;
   for (const watch of storedActiveWatches) {
@@ -119,12 +119,12 @@ export async function compareStoredWithScraped() {
     // Vänta 1 sekund mellan varje anrop till KS
     await new Promise((resolve) => setTimeout(resolve, 1_000));
 
-    const intersectingNewScrapedWatches = scrapedWatches.result.filter(({ postedDate: a }: { postedDate: string }) => {
-      return !storedWatches.some(({ postedDate: b }: { postedDate: string }) => b === a);
-    });
+    const intersectingNewScrapedWatches = scrapedWatches.result.filter(({ postedDate: a }) =>
+      !storedWatches.some(({ postedDate: b }) => b === a)
+    );
 
     if (intersectingNewScrapedWatches.length > 0) {
-      // TODO: Ska den returnera result och error för att inte skicka mails till användare när något går fel=
+      // TODO: Ska den returnera result och error för att inte skicka mails till användare när något går fel?
       await updateStoredWatches(scrapedWatches.result, storedWatch.id);
 
       await handleNewScrapedWatch(intersectingNewScrapedWatches);
@@ -135,7 +135,6 @@ export async function compareStoredWithScraped() {
 setInterval(compareStoredWithScraped, INTERVAL_IN_MS);
 
 async function handleNewScrapedWatch(newScrapedWatches: ScrapedWatch[]) {
-  // Loopa över varje ny klocka och skicka mail
   for (const watch of newScrapedWatches) {
     await sendEmailNotification(watch);
   }
@@ -146,9 +145,8 @@ async function sendEmailNotification(watch: ScrapedWatch) {
     await sendWatchNotification(getEmailText(watch));
 
     infoLogger.info({ message: `Email sent with watch: ${JSON.stringify(watch)}` });
-    // Skriv till databas (skapa tabell) om när ett mail skickades.
 
-    // Vänta 5 sekunder mellan varje mail.
+    // Vänta 5 sekunder mellan varje mail
     await new Promise((resolve) => setTimeout(resolve, 5_000));
   } catch (err) {
     errorLogger.error({

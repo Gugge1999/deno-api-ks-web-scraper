@@ -12,6 +12,9 @@
 * Byt alla tabeller till underscore _ i namnet
 
 
+* för login och registering https://github.com/thecodeholic/deno-login-register/blob/master/routes.ts
+
+
 * För db migration: [node-pg-migrate](https://salsita.github.io/node-pg-migrate/cli)
 
 

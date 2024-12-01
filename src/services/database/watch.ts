@@ -40,16 +40,17 @@ export function saveWatch(label: string, watchToScrape: string, scrapedWatches: 
 
 export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: string) {
   return await sql.begin(async (sql) => {
-    const [watch] = await sql<Watch[]>`
+    const watch = await sql<Watch[]>`
         UPDATE watch
             SET watches = (${JSON.stringify(newWatches)}), "lastEmailSent" = ${sql`now()`}
                 WHERE id = ${watchId}
                     RETURNING *`;
 
-    const [notification] = await sql<Notification[]>`
+    // TODO: Den kanske ska finnas an query för transaction i query.ts?
+    const notification = await sql<Notification[]>`
         INSERT INTO notification("watchId")
             VALUES
-                (${watchId}) 
+                (${watchId}) // TODO: Testa med random guid och se att transaktion inte går igenom
                      RETURNING *`;
 
     return [watch, notification];

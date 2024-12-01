@@ -18,12 +18,9 @@ scraperRoutes
       throw new httpErrors.InternalServerError("Kunde inte hämta bevakningar");
     }
 
-    const returnDto: WatchDto[] = [];
+    let returnDto: WatchDto[] = [];
     if (allWatches.result && allWatches.result.length > 0) {
-      for (const scrapedWatch of allWatches.result) {
-        const dto = createWatchDto(scrapedWatch);
-        returnDto.push(dto);
-      }
+      returnDto = createWatchDto(allWatches.result);
     }
 
     context.response.body = returnDto;
@@ -42,17 +39,13 @@ scraperRoutes
     context.response.body = { deleteWatchId: context.params.id };
   })
   .put(`${BEVAKNINGAR_BASE_URL}/toggle-active-status`, async (context) => {
-    /** TODO:
-     * WARNING* this is an unreliable API. In HTTP/ 2 in many situations you cannot
-     * determine if a request has a body or not unless you attempt to read the body, due
-     * to the streaming nature of HTTP/ 2. As of Deno 1.16.1, for HTTP/ 1.1, Deno
-     * also reflects that behaviour. The only reliable way to determine if a request has
-     * a body or not is to attempt to read the body. */
-    if (context.request.hasBody === false) {
-      throw new httpErrors.UnprocessableEntity("body krävs");
+    try {
+      await context.request.body.json();
+    } catch (e) {
+      throw new httpErrors.UnprocessableEntity(`Body krävs. Error: ${e}`);
     }
 
-    const { id, active, label } = await context.request.body.json();
+    const { id, active, label }: { id?: string; label?: string; active?: boolean } = await context.request.body.json();
 
     if (id === undefined || active === undefined || label === undefined) {
       throw new httpErrors.UnprocessableEntity("id, active och label behöver finnas i body");
@@ -71,17 +64,13 @@ scraperRoutes
     context.response.body = response;
   })
   .post(`${BEVAKNINGAR_BASE_URL}/save-watch`, async (context) => {
-    /** TODO:
-     * WARNING* this is an unreliable API. In HTTP/ 2 in many situations you cannot
-     * determine if a request has a body or not unless you attempt to read the body, due
-     * to the streaming nature of HTTP/ 2. As of Deno 1.16.1, for HTTP/ 1.1, Deno
-     * also reflects that behaviour. The only reliable way to determine if a request has
-     * a body or not is to attempt to read the body. */
-    if (context.request.hasBody === false) {
-      throw new httpErrors.UnprocessableEntity("body krävs");
+    try {
+      await context.request.body.json();
+    } catch (e) {
+      throw new httpErrors.UnprocessableEntity(`Body krävs. Error: ${e}`);
     }
 
-    const { label, watchToScrape } = await context.request.body.json();
+    const { label, watchToScrape }: { label?: string; watchToScrape?: string } = await context.request.body.json();
 
     if (label === undefined || watchToScrape === undefined) {
       throw new httpErrors.UnprocessableEntity("label och watchToScrape behöver finnas i body");
@@ -89,7 +78,7 @@ scraperRoutes
 
     const scrapedWatches = await scrapeWatchInfo(watchToScrape);
 
-    if (scrapedWatches.error || scrapedWatches.result === null) {
+    if (scrapedWatches.error !== null || scrapedWatches.result === null) {
       throw new httpErrors.BadRequest(scrapedWatches.error ?? "");
     }
 
@@ -101,14 +90,14 @@ scraperRoutes
 
     const dbRes = newWatch.result[0];
 
-    const watches: ScrapedWatch[] = JSON.parse(newWatch.result[0].watches.toString());
+    const watches: ScrapedWatch[] = JSON.parse(newWatch.result[0].watches);
 
     const returnDto: WatchDto = {
       id: dbRes.id,
-      active: true,
       label: dbRes.label,
-      lastEmailSent: null,
       added: dbRes.added,
+      active: true,
+      lastEmailSent: null,
       watchToScrape: dbRes.watchToScrape,
       watch: {
         postedDate: watches[0].postedDate,
@@ -120,24 +109,25 @@ scraperRoutes
     context.response.body = returnDto;
   });
 
-function createWatchDto(watchDbModel: Watch) {
-  const watches: ScrapedWatch[] = JSON.parse(watchDbModel.watches);
+function createWatchDto(allWatches: Watch[]) {
+  const returnDto: WatchDto[] = [];
 
-  const dto: WatchDto = {
-    id: watchDbModel.id,
-    active: watchDbModel.active,
-    added: watchDbModel.added,
-    label: watchDbModel.label,
-    lastEmailSent: watchDbModel.lastEmailSent,
-    watchToScrape: watchDbModel.watchToScrape,
-    watch: {
-      postedDate: watches[0].postedDate,
-      link: watches[0].link,
-      name: watches[0].name,
-    },
-  };
+  for (const scrapedWatch of allWatches) {
+    const watches: ScrapedWatch[] = JSON.parse(scrapedWatch.watches);
 
-  return dto;
+    const dto: WatchDto = {
+      ...scrapedWatch,
+      watch: {
+        postedDate: watches[0].postedDate,
+        link: watches[0].link,
+        name: watches[0].name,
+      },
+    };
+
+    returnDto.push(dto);
+  }
+
+  return returnDto;
 }
 
 export default scraperRoutes;

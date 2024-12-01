@@ -1,14 +1,14 @@
-import process from "node:process";
 // @deno-types="npm:@types/luxon@^3.4.2"
 import { DateTime } from "@luxon";
+import process from "node:process";
 import { DurationObjectUnits } from "npm:@types/luxon@3.4.2";
 
 export function getUptime(): DurationObjectUnits {
-  const currentTimePlusUptime = DateTime.now().plus({
+  const currentTime = DateTime.now();
+
+  const currentTimePlusUptime = currentTime.plus({
     seconds: process.uptime(),
   });
-
-  const currentTime = DateTime.now();
 
   const uptime = currentTimePlusUptime.diff(currentTime, [
     "years",
