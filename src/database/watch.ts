@@ -21,7 +21,7 @@ export async function toggleActiveStatus(isActive: boolean, id: string) {
 }
 
 export function saveWatch(label: string, watchToScrape: string, scrapedWatches: ScrapedWatch[]) {
-  // TODO: Kom ihåg att lägga till clock_timestamp() i postgres migration
+  // TODO: Kom ihåg att lägga till clock_timestamp() i postgres migration på watch och notification
 
   const newWatchQuery = sql<Watch[]>`
     INSERT INTO watch(label, "watchToScrape", active, watches)
