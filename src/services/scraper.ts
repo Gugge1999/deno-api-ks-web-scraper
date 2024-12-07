@@ -51,6 +51,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
           .text()
           .replace(
             // Radera säljstatus
+            // TODO: Den här verkar ta med &nbsp också
             /Tillbakadragen|Avslutad|Säljes\/Bytes|Säljes|Bytes|OHPF|\//i,
             "",
           )

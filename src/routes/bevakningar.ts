@@ -1,10 +1,12 @@
 import { httpErrors, Router } from "@oak/oak";
 import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus } from "../database/watch.ts";
 import { validate } from "jsr:@std/uuid";
-import { WatchDto } from "../models/watch-dto.ts";
+import { WatchAndNotificationDto, WatchDto } from "../models/watch-dto.ts";
 import { Watch } from "../models/watch.ts";
 import { scrapeWatchInfo } from "../services/scraper.ts";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
+import { getAllNotifications } from "../database/notification.ts";
+import { Notification } from "../models/notification.ts";
 
 const scraperRoutes = new Router();
 
@@ -12,15 +14,15 @@ const BEVAKNINGAR_BASE_URL = "/api/bevakningar";
 
 scraperRoutes
   .get(`${BEVAKNINGAR_BASE_URL}/all-watches`, async (context) => {
-    const allWatches = await getAllWatches();
+    const [allWatches, notifications] = await Promise.all([await getAllWatches(), await getAllNotifications()]);
 
-    if (allWatches.error) {
-      throw new httpErrors.InternalServerError("Kunde inte hämta bevakningar");
+    if (allWatches.error || notifications.error || notifications.result === null) {
+      throw new httpErrors.InternalServerError("Kunde inte hämta bevakningar och notiser");
     }
 
     let returnDto: WatchDto[] = [];
     if (allWatches.result && allWatches.result.length > 0) {
-      returnDto = createWatchDto(allWatches.result);
+      returnDto = createWatchDto(allWatches.result, notifications.result);
     }
 
     context.response.body = returnDto;
@@ -111,14 +113,21 @@ scraperRoutes
     context.response.body = returnDto;
   });
 
-function createWatchDto(allWatches: Watch[]) {
+function createWatchDto(allWatches: Watch[], allNotifications: Notification[]) {
   const returnDto: WatchDto[] = [];
 
   for (const scrapedWatch of allWatches) {
     const watches: ScrapedWatch[] = JSON.parse(scrapedWatch.watches);
+    const notificationsForWatch = allNotifications.filter((n) => scrapedWatch.id === n.watchId).map((m) => m.sent);
 
-    const dto: WatchDto = {
-      ...scrapedWatch,
+    const dto: WatchAndNotificationDto = {
+      id: scrapedWatch.id,
+      active: scrapedWatch.active,
+      added: scrapedWatch.added,
+      label: scrapedWatch.label,
+      lastEmailSent: scrapedWatch.lastEmailSent,
+      watchToScrape: scrapedWatch.watchToScrape,
+      notifications: notificationsForWatch,
       watch: {
         postedDate: watches[0].postedDate,
         link: watches[0].link,

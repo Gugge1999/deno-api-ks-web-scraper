@@ -5,17 +5,10 @@ import { runDbQuery, sql } from "./query.ts";
 import { Notification } from "../models/notification.ts";
 import { errorLogger } from "../services/logger.ts";
 
-export function getAllWatches() {
-  return runDbQuery(sql<Watch[]>`SELECT * FROM watch ORDER BY added`);
-}
-
-export function getAllActiveWatches() {
-  return runDbQuery(sql<Watch[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
-}
-
-export function deleteWatchById(id: string) {
-  return runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
-}
+export const getAllWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watch ORDER BY added`);
+export const getAllActiveWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
+export const deleteWatchById = (id: string) => runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
+const getWatchById = (id: string) => runDbQuery(sql<Watch[]>`SELECT FROM watch WHERE id = ${id}`);
 
 export async function toggleActiveStatus(isActive: boolean, id: string) {
   const watch = await getWatchById(id);
@@ -68,8 +61,4 @@ export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: s
       error: err,
     };
   });
-}
-
-function getWatchById(id: string) {
-  return runDbQuery(sql<Watch[]>`SELECT FROM watch WHERE id = ${id}`);
 }

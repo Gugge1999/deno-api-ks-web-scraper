@@ -4,3 +4,7 @@ import { ScrapedWatch } from "./scraped-watches.ts";
 export type WatchDto = Omit<Watch, "watches"> & {
   watch: ScrapedWatch;
 };
+
+export interface WatchAndNotificationDto extends WatchDto {
+  notifications: Date[];
+}
