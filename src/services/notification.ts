@@ -20,7 +20,7 @@ const transporter = createTransport({
 
 export async function sendWatchNotification(emailText: string) {
   // TODO: Det här finns inte i deno
-  if (Deno.env.get("NODE_ENV") === "develop") {
+  if (Deno.env.get("ENV") === "dev") {
     return;
   }
 
@@ -34,7 +34,7 @@ export async function sendWatchNotification(emailText: string) {
 
 export async function sendErrorNotification(err: unknown) {
   // TODO: Det här finns inte i deno
-  if (Deno.env.get("NODE_ENV") === "develop") {
+  if (Deno.env.get("ENV") === "dev") {
     return;
   }
 

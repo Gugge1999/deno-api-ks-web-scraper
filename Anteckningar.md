@@ -3,6 +3,9 @@
 * Uppdatera postgres till senaste version
 
 
+* Lägg till ENV variabel i fly.io
+
+
 * Jag tror att watchToScrape kolumnen inte behöver innehålla https://.... Utan bara klockan man bevakar
 
 

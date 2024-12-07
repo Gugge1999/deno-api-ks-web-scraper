@@ -18,6 +18,7 @@
     "jsr:@std/io@0.224": "0.224.9",
     "jsr:@std/media-types@1": "1.0.3",
     "jsr:@std/path@1": "1.0.8",
+    "jsr:@std/path@^1.0.8": "1.0.8",
     "jsr:@std/uuid@*": "1.0.4",
     "jsr:@std/uuid@^1.0.4": "1.0.4",
     "jsr:@tajpouria/cors@^1.2.1": "1.2.1",
@@ -27,6 +28,7 @@
     "npm:luxon@^3.5.0": "3.5.0",
     "npm:nodemailer@^6.9.15": "6.9.16",
     "npm:path-to-regexp@6.2.1": "6.2.1",
+    "npm:postgres-shift@0.1": "0.1.0",
     "npm:postgres@3.4.5": "3.4.5",
     "npm:winston@3.16.0": "3.16.0",
     "npm:winston@^3.15.0": "3.16.0"
@@ -53,7 +55,7 @@
         "jsr:@std/http",
         "jsr:@std/io",
         "jsr:@std/media-types",
-        "jsr:@std/path",
+        "jsr:@std/path@1",
         "npm:path-to-regexp"
       ]
     },
@@ -354,6 +356,9 @@
     "path-to-regexp@6.2.1": {
       "integrity": "sha512-JLyh7xT1kizaEvcaXOQwOc2/Yhw6KZOvPf1S8401UyLk86CU79LN3vl7ztXGm/pZ+YjoyAJ4rxmHwbkBXJX+yw=="
     },
+    "postgres-shift@0.1.0": {
+      "integrity": "sha512-/375iG0Kveh1Spk3kFtaTdGT9FUxtXYDDabGw/9/Jkk3f93dYM2R8ZgQzbknCG+ZpfoR114gZ71oR+lRr6XY3A=="
+    },
     "postgres@3.4.5": {
       "integrity": "sha512-cDWgoah1Gez9rN3H4165peY9qfpEo+SA61oQv65O3cRUE1pOEoJWwddwcqKE8XZYjbblOJlYDlLV4h67HrEVDg=="
     },
@@ -465,11 +470,13 @@
     "dependencies": [
       "jsr:@oak/oak@^17.1.3",
       "jsr:@std/datetime@~0.225.2",
+      "jsr:@std/path@^1.0.8",
       "jsr:@std/uuid@^1.0.4",
       "jsr:@tajpouria/cors@^1.2.1",
       "npm:cheerio@1.0.0",
       "npm:luxon@^3.5.0",
       "npm:nodemailer@^6.9.15",
+      "npm:postgres-shift@0.1",
       "npm:postgres@3.4.5",
       "npm:winston@^3.15.0"
     ]

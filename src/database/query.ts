@@ -1,23 +1,24 @@
 import { errorLogger } from "../services/logger.ts";
-import postgres from "postgres";
 import "jsr:@std/dotenv/load";
+import postgres from "postgres";
 
 interface DbResponse<T> {
   result: Awaited<T> | null;
   error: unknown;
 }
 
-// TODO: För url kanske det går att använda
-// const sql = postgres('postgres://username:password@host:port/database');
-
-// OBS: lägg märke till import från dotenv
-export const sql = postgres({
-  host: Deno.env.get("PGHOST"),
-  port: Number.parseInt(Deno.env.get("PGPORT") ?? "0"),
-  username: Deno.env.get("PGUSERNAME"),
-  password: Deno.env.get("PGPASSWORD"),
-  database: Deno.env.get("PGDATABASE"),
-});
+// OBS: lägg märke till import från dotenv. Den kastar inte fel om import saknas men kommer inte att fungera
+export const sql = Deno.env.get("ENV") === "dev"
+  ? postgres({
+    host: Deno.env.get("PGHOST"),
+    port: Number.parseInt(Deno.env.get("PGPORT") ?? "0"),
+    username: Deno.env.get("PGUSERNAME"),
+    password: Deno.env.get("PGPASSWORD"),
+    database: Deno.env.get("PGDATABASE"),
+  })
+  : postgres(Deno.env.get("DATABASE_URL") ?? "", { // TODO: Testa den i fly.io sen
+    ssl: true,
+  });
 
 export async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
   try {
