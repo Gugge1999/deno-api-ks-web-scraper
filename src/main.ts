@@ -23,6 +23,6 @@ console.log(`Init api @ ${currentTime()}\n`);
 
 const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 
-await compareStoredWithScraped();
-
 await app.listen({ port: denoPort });
+
+await compareStoredWithScraped();
