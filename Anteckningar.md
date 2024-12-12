@@ -9,27 +9,29 @@
 * Lägg till ENV variabel i fly.io
 
 
+* Gör en clean av deno.lock
+
+
 * Lägg till github actions
 
 
 * Byt alla tabeller till underscore _ i namnet
+ 
+
+* [deno docker](https://github.com/denoland/deno_docker). Alpine verkar bäst _Small. Simple. Secure_ 
 
 
-* för login och registering https://github.com/thecodeholic/deno-login-register/blob/master/routes.ts
-
-
-* För db migration: [node-pg-migrate](https://salsita.github.io/node-pg-migrate/cli)
-
+* [för login och registering](https://github.com/thecodeholic/deno-login-register/blob/master/routes.ts)
 
 ---
 
 
 # Dokumentation
 
-* Docs för [porsager/postgres](https://github.com/porsager/postgres)
+* [Docs för porsager/postgres](https://github.com/porsager/postgres)
 
 
-* Bra repo att kolla på: [deno api starter oak](https://github.com/asad-mlbd/deno-api-starter-oak)
+* [Bra repo - api starter oak](https://github.com/asad-mlbd/deno-api-starter-oak)
 
 
 * [JWT](https://github.com/wpcodevo/deno-refresh-jwt/blob/master/src/controllers/auth.controller.ts)

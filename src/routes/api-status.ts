@@ -32,12 +32,12 @@ function broadcastApiStatus() {
 const getApiStatus = (): ApiStatus => ({
   status: "active",
   scrapingIntervalInMinutes: INTERVAL_IN_MIN,
-  memoryUsage: formatBytes(Deno.memoryUsage().rss, 0),
+  memoryUsage: formatBytes(Deno.memoryUsage().rss),
   uptime: getUptime(),
 });
 
 setInterval(() => {
   broadcastApiStatus();
-}, 5_000);
+}, 1_000);
 
 export default apiStatusRoutes;

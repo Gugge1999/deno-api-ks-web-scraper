@@ -46,12 +46,13 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   $(CONTENT_ROW_TITLE_CLASS)
     .get()
     .map((element: any) => {
+      // TODO: Det här gåt nog att göra enklare och bara plocka ut texten för namnet på annonsen. Inte badge för status också
       return titles.push(
         $(element)
           .text()
           .replace(
             // TODO: Den här verkar ta med &nbsp också
-            /Tillbakadragen|Avslutad|Säljes|\/Bytes|Köpes|Hittat|Företagsannons|OHPF|\//i,
+            /Tillbakadragen|Avslutad|Säljes|\/Bytes|Köpes|Hittat|Företagsannons|OHPF|\//gi,
             "",
           )
           .trim(),

@@ -1,8 +1,15 @@
-import type { DurationObjectUnits } from "npm:@types/luxon@^3.4.2";
-
 export interface ApiStatus {
   status: "active" | "inactive" | "pending";
   scrapingIntervalInMinutes: number;
-  memoryUsage: string;
-  uptime: DurationObjectUnits;
+  memoryUsage: number;
+  uptime: ApiUptime;
+}
+
+export interface ApiUptime {
+  years: number;
+  months: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
 }

@@ -1,42 +1,36 @@
-// @deno-types="npm:@types/luxon@^3.4.2"
-import { DateTime } from "luxon";
 import process from "node:process";
-import { DurationObjectUnits } from "npm:@types/luxon@3.4.2";
+import { difference } from "@std/datetime/difference";
+import { ApiUptime } from "../models/status.dto.ts";
 
-export function getUptime(): DurationObjectUnits {
-  const currentTime = DateTime.now();
+export function getUptime(): ApiUptime {
+  const date = new Date(); // get the current time
+  date.setSeconds(date.getSeconds() + process.uptime());
 
-  const currentTimePlusUptime = currentTime.plus({
-    seconds: process.uptime(),
-  });
+  const uptime = difference(new Date(), date);
 
-  const uptime = currentTimePlusUptime.diff(currentTime, [
-    "years",
-    "months",
-    "days",
-    "hours",
-    "minutes",
-    "seconds",
-  ]);
+  const { milliseconds } = uptime;
 
-  const uptimeObj = uptime.toObject();
+  const hejsan = new Date(milliseconds ?? 0);
 
   return {
-    ...uptimeObj,
-    seconds: Math.floor(uptimeObj.seconds ?? 0), // Radera decimaler
+    seconds: hejsan.getUTCSeconds(),
+    minutes: hejsan.getUTCMinutes(),
+    hours: hejsan.getUTCHours(),
+    // TODO: Fixa dessa sen. Utan lib
+    days: 0,
+    months: 0,
+    years: 0,
   };
 }
 
-export function formatBytes(bytes: number, decimals: number) {
+export function formatBytes(bytes: number) {
   if (!+bytes) {
-    return "0 Bytes";
+    return 0;
   }
 
   const oneKb = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes: readonly string[] = ["Bytes", "kB", "MB", "GB"];
 
   const i = Math.floor(Math.log(bytes) / Math.log(oneKb));
 
-  return `${parseFloat((bytes / Math.pow(oneKb, i)).toFixed(dm))} ${sizes[i]}`;
+  return Math.round(bytes / Math.pow(oneKb, i));
 }
