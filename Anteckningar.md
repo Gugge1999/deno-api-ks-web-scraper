@@ -9,7 +9,7 @@
 * Lägg till ENV variabel i fly.io
 
 
-* Gör en clean av deno.lock
+* Är [deno-nessie](https://github.com/halvardssm/deno-nessie) bättre för migration?
 
 
 * Lägg till github actions
