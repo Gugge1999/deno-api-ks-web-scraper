@@ -1,4 +1,4 @@
-# TODO
+## TODO
 
 * Uppdatera postgres till senaste version
 
@@ -21,15 +21,19 @@
 * [Är TypeSpec bra för att ha typsäkert mellan api och SPA?](https://typespec.io/)
 
 
-* [deno docker](https://github.com/denoland/deno_docker). Alpine verkar bäst _Small. Simple. Secure_ 
-
-
 * [för login och registering](https://github.com/thecodeholic/deno-login-register/blob/master/routes.ts)
 
 ---
 
 
-# Dokumentation
+## Dokumentation
+ 
+### Används postgres i Windows Terminal
+1. Ansluta: `fly postgres connect -a api-ks-web-scraper-db`
+2. Anslut till databas: `\c api-ks-web-scraper`
+3. `select * from watch \g` (`\g` används för att visa att sql:en är slut och postgres ska exekvera det som finns före)
+4. Lista alla tabeller: `\dt`
+5. Visa datatyper, pk och fk på en tabell: `\d watch` 
 
 * [Docs för porsager/postgres](https://github.com/porsager/postgres)
 
