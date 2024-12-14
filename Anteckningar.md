@@ -18,6 +18,9 @@
 * Byt alla tabeller till underscore _ i namnet
  
 
+* [Är TypeSpec bra för att ha typsäkert mellan api och SPA?](https://typespec.io/)
+
+
 * [deno docker](https://github.com/denoland/deno_docker). Alpine verkar bäst _Small. Simple. Secure_ 
 
 

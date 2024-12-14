@@ -17,7 +17,7 @@ export const sql = Deno.env.get("ENV") === "dev"
     database: Deno.env.get("PGDATABASE"),
   })
   // TODO: Testa den i fly.io sen
-  : postgres(Deno.env.get("DATABASE_URL") ?? "", { ssl: true });
+  : postgres(Deno.env.get("DATABASE_URL") ?? "", { ssl: { rejectUnauthorized: false } });
 
 export async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
   try {
