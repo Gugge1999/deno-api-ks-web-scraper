@@ -3,7 +3,7 @@ import { load } from "cheerio";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { currentDateAndTime, currentTime } from "./time-and-date.ts";
 import { sendErrorNotification, sendWatchNotification } from "./notification.ts";
-import { errorLogger, infoLogger } from "./logger.ts";
+// import { errorLogger, infoLogger } from "./logger.ts";
 import { getAllActiveWatches, updateStoredWatches } from "../database/watch.ts";
 import { INTERVAL_IN_MS } from "../constants/config.ts";
 
@@ -15,7 +15,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   } catch (err) {
     const message = `Kunde inte hämta url. Angiven url: ${watchToScrape}`;
 
-    errorLogger.error({ message });
+    // errorLogger.error({ message });
 
     console.error(message, err);
     return {
@@ -148,15 +148,15 @@ async function sendEmailNotification(watch: ScrapedWatch) {
   try {
     await sendWatchNotification(emailText(watch));
 
-    infoLogger.info({ message: `Email sent with watch: ${JSON.stringify(watch)}` });
+    // infoLogger.info({ message: `Email sent with watch: ${JSON.stringify(watch)}` });
 
     // Vänta 5 sekunder mellan varje mail
     await new Promise((resolve) => setTimeout(resolve, 5_000));
   } catch (err) {
-    errorLogger.error({
-      message: "Function sendWatchNotification failed.",
-      stacktrace: err,
-    });
+    // errorLogger.error({
+    //   message: "Function sendWatchNotification failed.",
+    //   stacktrace: err,
+    // });
 
     await sendErrorNotification(err);
   }

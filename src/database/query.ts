@@ -1,4 +1,4 @@
-import { errorLogger } from "../services/logger.ts";
+// import { errorLogger } from "../services/logger.ts";
 import "jsr:@std/dotenv/load";
 import postgres from "postgres";
 
@@ -27,10 +27,10 @@ export async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
       error: null,
     };
   } catch (error) {
-    errorLogger.error({
-      message: "Error i sql",
-      stacktrace: error,
-    });
+    // errorLogger.error({
+    //   message: "Error i sql",
+    //   stacktrace: error,
+    // });
 
     return {
       result: null,
