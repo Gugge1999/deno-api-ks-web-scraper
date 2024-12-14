@@ -3,7 +3,7 @@ import { httpErrors } from "@oak/oak";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { runDbQuery, sql } from "./query.ts";
 import { Notification } from "../models/notification.ts";
-// import { errorLogger } from "../services/logger.ts";
+import { errorLogger } from "../services/logger.ts";
 
 export const getAllWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watch ORDER BY added`);
 export const getAllActiveWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
@@ -49,10 +49,10 @@ export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: s
       error: null,
     };
   }).catch((err: unknown) => {
-    // errorLogger.error({
-    //   message: "Transaktion för att uppdatera bevakning misslyckades.",
-    //   stacktrace: err,
-    // });
+    errorLogger.error({
+      message: "Transaktion för att uppdatera bevakning misslyckades.",
+      stacktrace: err,
+    });
 
     return {
       result: null,

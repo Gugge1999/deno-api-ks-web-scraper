@@ -1,5 +1,5 @@
 import { Context, Status } from "@oak/oak";
-// import { errorLogger } from "../services/logger.ts";
+import { errorLogger } from "../services/logger.ts";
 
 const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
   try {
@@ -9,10 +9,10 @@ const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
     const stack = err && typeof err === "object" && "stack" in err ? err.stack : "";
     const status = getErrorStatus(err);
 
-    // errorLogger.error({
-    //   message: message,
-    //   stacktrace: stack,
-    // });
+    errorLogger.error({
+      message: message,
+      stacktrace: stack,
+    });
 
     // TODO: Det är nog bra med en errors sql tabell för att lättare kunna se sql fel i prod
 
