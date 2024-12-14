@@ -7,8 +7,8 @@ primary_region = "arn"
   PORT = "8080"
   PRIMARY_REGION = "arn"
 
-[processes]
-app = 'run -A src/main.ts'
+  [processes]
+  app = 'run -A src/main.ts'
 
 [experimental]
   auto_rollback = true
