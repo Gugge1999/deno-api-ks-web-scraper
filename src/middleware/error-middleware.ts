@@ -14,6 +14,8 @@ const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
       stacktrace: stack,
     });
 
+    // TODO: Det är nog bra med en errors sql tabell för att lättare kunna se sql fel i prod
+
     ctx.response.status = status;
     ctx.response.body = {
       status,

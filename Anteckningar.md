@@ -6,16 +6,13 @@
 * Fixa database panel i WebStorm
 
 
-* Lägg till ENV variabel i fly.io
-
-
 * Är [deno-nessie](https://github.com/halvardssm/deno-nessie) bättre för migration?
 
 
 * Lägg till github actions
 
 
-* Byt alla tabeller till underscore _ i namnet
+* Byt alla tabeller till underscore _ i namnet i databasen
  
 
 * [Är TypeSpec bra för att ha typsäkert mellan api och SPA?](https://typespec.io/)
@@ -24,8 +21,6 @@
 * [för login och registering](https://github.com/thecodeholic/deno-login-register/blob/master/routes.ts)
 
 ---
-
-
 ## Dokumentation
  
 ### Används postgres i Windows Terminal

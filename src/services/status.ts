@@ -3,23 +3,32 @@ import { difference } from "@std/datetime/difference";
 import { ApiUptime } from "../models/status.dto.ts";
 
 export function getUptime(): ApiUptime {
-  const date = new Date(); // get the current time
+  const date = new Date();
   date.setSeconds(date.getSeconds() + process.uptime());
 
   const uptime = difference(new Date(), date);
 
-  const { milliseconds } = uptime;
+  const milliseconds = uptime.milliseconds ?? 1;
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const totalHours = Math.floor(totalMinutes / 60);
+  const totalDays = Math.floor(totalHours / 24);
+  const totalMonths = Math.floor(totalDays / 30);
+  const years = Math.floor(totalDays / 365);
 
-  const hejsan = new Date(milliseconds ?? 0);
+  const seconds = totalSeconds % 60;
+  const minutes = totalMinutes % 60;
+  const hours = totalHours % 24;
+  const days = totalDays % 30;
+  const months = totalMonths % 12;
 
   return {
-    seconds: hejsan.getUTCSeconds(),
-    minutes: hejsan.getUTCMinutes(),
-    hours: hejsan.getUTCHours(),
-    // TODO: Fixa dessa sen. Utan lib
-    days: 0,
-    months: 0,
-    years: 0,
+    seconds,
+    minutes,
+    hours,
+    days,
+    months,
+    years,
   };
 }
 
