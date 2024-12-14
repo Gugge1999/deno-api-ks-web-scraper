@@ -5,7 +5,7 @@ import { runDbQuery, sql } from "./query.ts";
 import { Notification } from "../models/notification.ts";
 import { errorLogger } from "../services/logger.ts";
 
-export const getAllWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watchasdf ORDER BY added`);
+export const getAllWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watch ORDER BY added`);
 export const getAllActiveWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
 export const deleteWatchById = (id: string) => runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
 const getWatchById = (id: string) => runDbQuery(sql<Watch[]>`SELECT FROM watch WHERE id = ${id}`);
