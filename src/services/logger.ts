@@ -17,10 +17,10 @@ export const errorLogger = createLogger({
     prettyPrint(),
   ),
   exitOnError: false,
-  transports: [new transports.Console(), new transports.File({ filename: "src/error.log" })],
+  transports: [new transports.Console(), new transports.File({ filename: "logs/error.log" })],
 });
 
 export const infoLogger = createLogger({
   format: format.combine(customFormat),
-  transports: [new transports.Console(), new transports.File({ filename: "src/info.log" })],
+  transports: [new transports.Console(), new transports.File({ filename: "logs/info.log" })],
 });
