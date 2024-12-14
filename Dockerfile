@@ -18,4 +18,4 @@ COPY . .
 # Compile the main app so that it doesn't need to be compiled each startup/entry.
 RUN deno cache src/main.ts
 
-CMD ["task", "start"]
+CMD ["run", "-A", "src/main.ts"]
