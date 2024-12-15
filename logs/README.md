@@ -1,0 +1,1 @@
+Den här filen behöver finnas eftersom Docker inte kan skapa en ny mapp utan root permission
