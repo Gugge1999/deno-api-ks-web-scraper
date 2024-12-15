@@ -150,8 +150,9 @@ async function sendEmailNotification(watch: ScrapedWatch) {
 
     infoLogger.info({ message: `Email sent with watch: ${JSON.stringify(watch)}` });
 
-    // Vänta 5 sekunder mellan varje mail
-    await new Promise((resolve) => setTimeout(resolve, 5_000));
+    const notificationDelay = Deno.env.get("ENV") === "dev" ? 1 : 5_000;
+
+    await new Promise((resolve) => setTimeout(resolve, notificationDelay));
   } catch (err) {
     errorLogger.error({
       message: "Function sendWatchNotification failed.",
