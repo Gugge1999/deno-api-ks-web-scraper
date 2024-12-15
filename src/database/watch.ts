@@ -34,7 +34,7 @@ export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: s
   return await sql.begin(async (sql) => {
     const [watch] = await sql<WatchDbRes[]>`
         UPDATE watch
-            SET watches = (${JSON.stringify(newWatches)}), last_email_sent = ${sql`now()`}
+            SET watches = (${JSON.stringify(newWatches)}), last_email_sent = now()
                 WHERE id = ${watchId}
                     RETURNING *`;
 
