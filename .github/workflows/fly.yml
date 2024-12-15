@@ -7,10 +7,6 @@ on:
     branches:
       - main
 
-permissions:
-  id-token: write # required
-  contents: read
-
 jobs:
   deploy:
     name: Deploy app
@@ -18,9 +14,6 @@ jobs:
     concurrency: deploy-group # optional: ensure only one action runs at a time
     steps:
       - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy
         env:

@@ -4,7 +4,7 @@ const { combine, timestamp, prettyPrint, errors, printf } = format;
 
 const TIME_FORMAT_LOGGER = "HH:mm:ss YYYY-MM-DD";
 
-// Byt till deno std logger: https://jsr.io/@std/log
+// TODO: Byt till deno std logger: https://jsr.io/@std/log
 const customFormat = format.combine(
   timestamp({ format: TIME_FORMAT_LOGGER }),
   printf((info) => `${info.message} [${info.timestamp}]`),

@@ -20,10 +20,10 @@
 
 * [för login och registering](https://github.com/thecodeholic/deno-login-register/blob/master/routes.ts)
 
----
+
 ## Dokumentation
  
-### Används postgres i Windows Terminal
+### Guide: använda postgres i fly.io via Windows Terminal
 1. Ansluta: `fly postgres connect -a api-ks-web-scraper-db`
 2. Anslut till databas: `\c api-ks-web-scraper`
 3. `select * from watch \g` (`\g` används för att visa att sql:en är slut och postgres ska exekvera det som finns före)
