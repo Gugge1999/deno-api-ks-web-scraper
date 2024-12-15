@@ -30,6 +30,10 @@
 4. Lista alla tabeller: `\dt`
 5. Visa datatyper, pk och fk på en tabell: `\d watch` 
 
+  
+* [deno blog](https://deno.com/blog)
+
+
 * [Docs för porsager/postgres](https://github.com/porsager/postgres)
 
 

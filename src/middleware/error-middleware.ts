@@ -5,8 +5,8 @@ const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
   try {
     await next();
   } catch (err: unknown) {
-    const message = err && typeof err === "object" && "message" in err ? err.message : "Något gick fel";
     const stack = err && typeof err === "object" && "stack" in err ? err.stack : "";
+    const message = getErrMessage(err);
     const status = getErrorStatus(err);
 
     errorLogger.error({
@@ -35,6 +35,15 @@ function getErrorStatus(err: unknown): number {
   }
 
   return Status.InternalServerError;
+}
+
+function getErrMessage(err: unknown): string {
+  if (err && typeof err === "object" && "message" in err && typeof err.message === "string") {
+    const errMsg = err.message.split(" dbError")[0];
+    return errMsg;
+  }
+
+  return "Något gick fel";
 }
 
 export default errorMiddleware;

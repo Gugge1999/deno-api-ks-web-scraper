@@ -5,7 +5,7 @@ import { runDbQuery, sql } from "./query.ts";
 import { Notification } from "../models/notification.ts";
 import { errorLogger } from "../services/logger.ts";
 
-export const getAllWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watch ORDER BY added`);
+export const getAllWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watchasdasd ORDER BY added`);
 export const getAllActiveWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
 export const deleteWatchById = (id: string) => runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
 const getWatchById = (id: string) => runDbQuery(sql<Watch[]>`SELECT FROM watch WHERE id = ${id}`);
@@ -38,6 +38,7 @@ export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: s
                 WHERE id = ${watchId}
                     RETURNING *`;
 
+    // TODO: Den borde använda query från notification.ts
     const [notification] = await sql<Notification[]>`
         INSERT INTO notification("watchId")
             VALUES

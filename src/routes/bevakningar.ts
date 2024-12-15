@@ -17,7 +17,9 @@ scraperRoutes
     const [allWatches, notifications] = await Promise.all([await getAllWatches(), await getAllNotifications()]);
 
     if (allWatches.error || notifications.error || notifications.result === null) {
-      throw new httpErrors.InternalServerError("Kunde inte hämta bevakningar och notiser");
+      throw new httpErrors.InternalServerError(
+        `Kunde inte hämta bevakningar och notiser. dbError - allWatches.error: ${allWatches.error} "- notification error: ${notifications.error}`,
+      );
     }
 
     let returnDto: WatchDto[] = [];
@@ -35,7 +37,7 @@ scraperRoutes
     const deleteWatch = await deleteWatchById(context.params.id);
 
     if (deleteWatch.error) {
-      throw new httpErrors.InternalServerError("Kunde inte radera bevakning");
+      throw new httpErrors.InternalServerError(`Kunde inte radera bevakning dbError: ${deleteWatch.error}`);
     }
 
     context.response.body = { deleteWatchId: context.params.id };
@@ -47,7 +49,11 @@ scraperRoutes
       throw new httpErrors.UnprocessableEntity(`Body krävs. Error: ${e}`);
     }
 
-    const { id, active, label }: { id?: string; label?: string; active?: boolean } = await context.request.body.json();
+    const { id, active, label }: {
+      id?: string;
+      label?: string;
+      active?: boolean;
+    } = await context.request.body.json();
 
     if (id === undefined || active === undefined || label === undefined) {
       throw new httpErrors.UnprocessableEntity("id, active och label behöver finnas i body");
@@ -58,7 +64,7 @@ scraperRoutes
     const watchResult = await toggleActiveStatus(newActiveStatus, id);
 
     if (watchResult.error) {
-      throw new httpErrors.InternalServerError("Kunde inte ändra aktiv status");
+      throw new httpErrors.InternalServerError(`Kunde inte ändra aktiv status dbError: ${watchResult.error}`);
     }
 
     const response = { id, label, active: newActiveStatus };
@@ -78,18 +84,18 @@ scraperRoutes
       throw new httpErrors.UnprocessableEntity("label och watchToScrape behöver finnas i body");
     }
     const watchToScrapeLink =
-      `https://klocksnack.se/search/1/?q=${watchToScrape}&t=post&c[child_nodes]=1&c[nodes][0]=11&c[title_only]=1&o=date`;
+      `https://klocksnack.se/search/1/?q=${watchToScrape}&t=post&c[child_nodes]=1&c[nodes][0]=11&c[title_only]=1&o=date` as const;
 
     const scrapedWatches = await scrapeWatchInfo(watchToScrapeLink);
 
     if (scrapedWatches.error !== null || scrapedWatches.result === null) {
-      throw new httpErrors.BadRequest(scrapedWatches.error ?? "");
+      throw new httpErrors.BadRequest(scrapedWatches.error ?? ` dbError: ${scrapedWatches.error}`);
     }
 
     const newWatch = await saveWatch(label, watchToScrapeLink, scrapedWatches.result);
 
     if (newWatch.error || newWatch.result === null) {
-      throw new httpErrors.InternalServerError("Kunde inte spara ny bevakning");
+      throw new httpErrors.InternalServerError(`Kunde inte spara ny bevakning dbError: ${newWatch.error}`);
     }
 
     const dbRes = newWatch.result[0];

@@ -3,13 +3,14 @@ import { createLogger, format, transports } from "winston";
 const { combine, timestamp, prettyPrint, errors, printf } = format;
 
 const TIME_FORMAT_LOGGER = "HH:mm:ss YYYY-MM-DD";
+type FilePath = `logs/${string}.log`;
 
-// TODO: Byt till deno std logger: https://jsr.io/@std/log
 const customFormat = format.combine(
   timestamp({ format: TIME_FORMAT_LOGGER }),
   printf((info) => `${info.message} [${info.timestamp}]`),
 );
 
+const errorLoggerPathName: FilePath = "logs/error.log";
 export const errorLogger = createLogger({
   format: combine(
     errors({ stack: true }),
@@ -17,10 +18,11 @@ export const errorLogger = createLogger({
     prettyPrint(),
   ),
   exitOnError: false,
-  transports: [new transports.Console(), new transports.File({ filename: "logs/error.log" })],
+  transports: [new transports.Console(), new transports.File({ filename: errorLoggerPathName })],
 });
 
+const infoLoggerPathName: FilePath = "logs/info.log";
 export const infoLogger = createLogger({
   format: format.combine(customFormat),
-  transports: [new transports.Console(), new transports.File({ filename: "logs/info.log" })],
+  transports: [new transports.Console(), new transports.File({ filename: infoLoggerPathName })],
 });
