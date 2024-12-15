@@ -1,19 +1,10 @@
 ## TODO
 
-* Uppdatera postgres till senaste version: [Guide](https://fly.io/docs/postgres/managing/upgrades/) Verkar vara ganska komplicerat
-
-
-* Fixa database panel i WebStorm
+* Uppdatera postgres till senaste version: Verkar vara ganska svårt på fly.io. [Guide](https://fly.io/docs/postgres/managing/upgrades/)
 
 
 * Är [deno-nessie](https://github.com/halvardssm/deno-nessie) bättre för migration?
 
-
-* Lägg till github actions
-
-
-* Byt alla tabeller till underscore _ i namnet i databasen
- 
 
 * [Är TypeSpec bra för att ha typsäkert mellan api och SPA?](https://typespec.io/)
 
