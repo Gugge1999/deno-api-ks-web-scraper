@@ -1,10 +1,10 @@
 /** OBS!: Den här har watches som string för att det är json i databasen  */
-export interface Watch {
+export interface WatchDbRes {
   id: string;
-  watchToScrape: string;
+  watch_to_scrape: string;
   label: string;
   watches: string;
   active: boolean;
-  lastEmailSent: Date | null;
+  last_email_sent: Date | null;
   added: Date;
 }

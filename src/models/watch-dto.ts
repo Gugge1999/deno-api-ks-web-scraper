@@ -1,8 +1,10 @@
-import { Watch } from "./watch.ts";
+import { WatchDbRes } from "./watch-db-res.ts";
 import { ScrapedWatch } from "./scraped-watches.ts";
 
-export type WatchDto = Omit<Watch, "watches"> & {
+export type WatchDto = Pick<WatchDbRes, "id" | "label" | "added" | "active"> & {
   watch: ScrapedWatch;
+  watchToScrape: string;
+  lastEmailSent: Date | null;
 };
 
 export interface WatchAndNotificationDto extends WatchDto {

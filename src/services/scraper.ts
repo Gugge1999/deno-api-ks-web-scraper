@@ -111,7 +111,7 @@ export async function compareStoredWithScraped() {
 
     const storedWatches: ScrapedWatch[] = JSON.parse(storedWatch.watches);
 
-    const scrapedWatches = await scrapeWatchInfo(storedWatch.watchToScrape);
+    const scrapedWatches = await scrapeWatchInfo(storedWatch.watch_to_scrape);
 
     if (scrapedWatches.error || scrapedWatches.result === null) {
       return;

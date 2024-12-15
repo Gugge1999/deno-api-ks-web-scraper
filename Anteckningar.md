@@ -1,6 +1,6 @@
 ## TODO
 
-* Uppdatera postgres till senaste version
+* Uppdatera postgres till senaste version: [Guide](https://fly.io/docs/postgres/managing/upgrades/) Verkar vara ganska komplicerat
 
 
 * Fixa database panel i WebStorm

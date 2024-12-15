@@ -2,7 +2,7 @@ import { httpErrors, Router } from "@oak/oak";
 import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus } from "../database/watch.ts";
 import { validate } from "jsr:@std/uuid";
 import { WatchAndNotificationDto, WatchDto } from "../models/watch-dto.ts";
-import { Watch } from "../models/watch.ts";
+import { WatchDbRes } from "../models/watch-db-res.ts";
 import { scrapeWatchInfo } from "../services/scraper.ts";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { getAllNotifications } from "../database/notification.ts";
@@ -108,7 +108,7 @@ scraperRoutes
       added: dbRes.added,
       active: true,
       lastEmailSent: null,
-      watchToScrape: dbRes.watchToScrape,
+      watchToScrape: dbRes.watch_to_scrape,
       watch: {
         postedDate: watches[0].postedDate,
         link: watches[0].link,
@@ -119,20 +119,20 @@ scraperRoutes
     context.response.body = returnDto;
   });
 
-function createWatchDto(allWatches: Watch[], allNotifications: Notification[]) {
+function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification[]) {
   const returnDto: WatchDto[] = [];
 
   for (const scrapedWatch of allWatches) {
     const watches: ScrapedWatch[] = JSON.parse(scrapedWatch.watches);
-    const notificationsForWatch = allNotifications.filter((n) => scrapedWatch.id === n.watchId).map((m) => m.sent);
+    const notificationsForWatch = allNotifications.filter((n) => scrapedWatch.id === n.watch_id).map((m) => m.sent);
 
     const dto: WatchAndNotificationDto = {
       id: scrapedWatch.id,
       active: scrapedWatch.active,
       added: scrapedWatch.added,
       label: scrapedWatch.label,
-      lastEmailSent: scrapedWatch.lastEmailSent,
-      watchToScrape: scrapedWatch.watchToScrape,
+      lastEmailSent: scrapedWatch.last_email_sent,
+      watchToScrape: scrapedWatch.watch_to_scrape,
       notifications: notificationsForWatch,
       watch: {
         postedDate: watches[0].postedDate,

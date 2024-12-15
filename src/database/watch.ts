@@ -1,15 +1,14 @@
-import { Watch } from "../models/watch.ts";
+import { WatchDbRes } from "../models/watch-db-res.ts";
 import { httpErrors } from "@oak/oak";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { runDbQuery, sql } from "./query.ts";
-import { Notification } from "../models/notification.ts";
 import { errorLogger } from "../services/logger.ts";
 import { insertNewNotification } from "./notification.ts";
 
-export const getAllWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watch ORDER BY added`);
-export const getAllActiveWatches = () => runDbQuery(sql<Watch[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
+export const getAllWatches = () => runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch ORDER BY added`);
+export const getAllActiveWatches = () => runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
 export const deleteWatchById = (id: string) => runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
-const getWatchById = (id: string) => runDbQuery(sql<Watch[]>`SELECT FROM watch WHERE id = ${id}`);
+const getWatchById = (id: string) => runDbQuery(sql<WatchDbRes[]>`SELECT FROM watch WHERE id = ${id}`);
 
 export async function toggleActiveStatus(isActive: boolean, id: string) {
   const watch = await getWatchById(id);
@@ -22,8 +21,8 @@ export async function toggleActiveStatus(isActive: boolean, id: string) {
 }
 
 export function saveWatch(label: string, watchToScrape: string, scrapedWatches: ScrapedWatch[]) {
-  const newWatchQuery = sql<Watch[]>`
-    INSERT INTO watch(label, "watchToScrape", active, watches)
+  const newWatchQuery = sql<WatchDbRes[]>`
+    INSERT INTO watch(label, watch_to_scrape, active, watches)
         VALUES
             (${label}, ${watchToScrape}, ${true}, ${JSON.stringify(scrapedWatches)})
                 RETURNING *`;
@@ -33,9 +32,9 @@ export function saveWatch(label: string, watchToScrape: string, scrapedWatches: 
 
 export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: string) {
   return await sql.begin(async (sql) => {
-    const [watch] = await sql<Watch[]>`
+    const [watch] = await sql<WatchDbRes[]>`
         UPDATE watch
-            SET watches = (${JSON.stringify(newWatches)}), "lastEmailSent" = ${sql`now()`}
+            SET watches = (${JSON.stringify(newWatches)}), last_email_sent = ${sql`now()`}
                 WHERE id = ${watchId}
                     RETURNING *`;
 

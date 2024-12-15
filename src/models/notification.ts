@@ -1,5 +1,5 @@
 export interface Notification {
   id: string;
-  watchId: string;
+  watch_id: string;
   sent: Date;
 }
