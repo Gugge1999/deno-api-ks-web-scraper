@@ -63,7 +63,7 @@ scraperRoutes
 
     const watchResult = await toggleActiveStatus(newActiveStatus, id);
 
-    if (watchResult.error) {
+    if (watchResult.error || watchResult.result?.length === 0) {
       throw new httpErrors.InternalServerError(`Kunde inte ändra aktiv status dbError: ${watchResult.error}`);
     }
 

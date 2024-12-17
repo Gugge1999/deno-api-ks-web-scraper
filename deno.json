@@ -1,7 +1,7 @@
 {
   "tasks": {
     "dev": "deno run --watch -A src/main.ts",
-    "start": "deno run -A src/migrations/migrations.ts && deno run --watch -A src/main.ts",
+    "start": "deno task migrations && deno run --watch -A src/main.ts",
     "migrations": "deno run -A src/migrations/migrations.ts"
   },
   "imports": {

@@ -8,16 +8,9 @@ import { insertNewNotification } from "./notification.ts";
 export const getAllWatches = () => runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch ORDER BY added`);
 export const getAllActiveWatches = () => runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
 export const deleteWatchById = (id: string) => runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
-const getWatchById = (id: string) => runDbQuery(sql<WatchDbRes[]>`SELECT FROM watch WHERE id = ${id}`);
 
-export async function toggleActiveStatus(isActive: boolean, id: string) {
-  const watch = await getWatchById(id);
-
-  if (watch.error || (watch.result && watch.result.length === 0)) {
-    throw new httpErrors.InternalServerError(`Kunde inte hitta bevakning med id: ${id}`);
-  }
-
-  return runDbQuery(sql`UPDATE watch SET active = ${isActive} WHERE id = ${id}`);
+export function toggleActiveStatus(isActive: boolean, id: string) {
+  return runDbQuery(sql<WatchDbRes[]>`UPDATE watch SET active = ${isActive} WHERE id = ${id} RETURNING *`);
 }
 
 export function saveWatch(label: string, watchToScrape: string, scrapedWatches: ScrapedWatch[]) {

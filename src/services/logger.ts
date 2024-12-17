@@ -1,7 +1,6 @@
 import { createLogger, format, transports } from "winston";
 
 const { combine, timestamp, prettyPrint, errors, printf } = format;
-
 const TIME_FORMAT_LOGGER = "HH:mm:ss YYYY-MM-DD";
 type FilePath = `logs/${string}.log`;
 
@@ -18,6 +17,7 @@ export const errorLogger = createLogger({
     prettyPrint(),
   ),
   exitOnError: false,
+  // TODO: Den finns stöd för postgres log, det är dock ett tredjeparts bibliotek: https://www.npmjs.com/package/winston-postgresql
   transports: [new transports.Console(), new transports.File({ filename: errorLoggerPathName })],
 });
 
