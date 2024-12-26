@@ -1,7 +1,7 @@
 import { httpErrors, Router } from "@oak/oak";
-import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus } from "../database/watch.ts";
+import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus, toggleAllStatuses } from "../database/watch.ts";
 import { validate } from "jsr:@std/uuid";
-import { WatchAndNotificationDto, WatchDto } from "../models/watch-dto.ts";
+import { WatchAndNotificationDto } from "../models/watch-dto.ts";
 import { WatchDbRes } from "../models/watch-db-res.ts";
 import { scrapeWatchInfo } from "../services/scraper.ts";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
@@ -22,7 +22,7 @@ scraperRoutes
       );
     }
 
-    let returnDto: WatchDto[] = [];
+    let returnDto: WatchAndNotificationDto[] = [];
     if (allWatches.result && allWatches.result.length > 0) {
       returnDto = createWatchDto(allWatches.result, notifications.result);
     }
@@ -102,12 +102,13 @@ scraperRoutes
 
     const watches: ScrapedWatch[] = JSON.parse(newWatch.result[0].watches);
 
-    const returnDto: WatchDto = {
+    const returnDto: WatchAndNotificationDto = {
       id: dbRes.id,
       label: dbRes.label,
       added: dbRes.added,
       active: true,
       lastEmailSent: null,
+      notifications: [],
       watchToScrape: dbRes.watch_to_scrape,
       watch: {
         postedDate: watches[0].postedDate,
@@ -117,10 +118,36 @@ scraperRoutes
     };
 
     context.response.body = returnDto;
+  })
+  .patch(`${BEVAKNINGAR_BASE_URL}/toggle-all`, async (context) => {
+    try {
+      await context.request.body.json();
+    } catch (e) {
+      throw new httpErrors.UnprocessableEntity(`Body krävs. Error: ${e}`);
+    }
+
+    const { ids, activateAll }: {
+      ids?: string[];
+      activateAll?: boolean;
+    } = await context.request.body.json();
+
+    if (ids === undefined || activateAll === undefined) {
+      throw new httpErrors.UnprocessableEntity("ids och isToggleActive behöver finnas i body");
+    }
+
+    const toggleAllResult = await toggleAllStatuses(ids, activateAll);
+
+    if (toggleAllResult.error || toggleAllResult.result?.length === 0) {
+      throw new httpErrors.InternalServerError(`Kunde inte ändra aktiv status på alla bevakningar: ${toggleAllResult.error}`);
+    }
+
+    const response = {};
+
+    context.response.body = response;
   });
 
-function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification[]) {
-  const returnDto: WatchDto[] = [];
+function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification[]): WatchAndNotificationDto[] {
+  const returnDto: WatchAndNotificationDto[] = [];
 
   for (const scrapedWatch of allWatches) {
     const watches: ScrapedWatch[] = JSON.parse(scrapedWatch.watches);

@@ -18,7 +18,7 @@ const transporter = createTransport({
   },
 });
 
-export async function sendWatchNotification(emailText: string) {
+export async function sendEmailNotification(emailText: string) {
   if (Deno.env.get("ENV") === "dev") {
     return;
   }
@@ -31,7 +31,7 @@ export async function sendWatchNotification(emailText: string) {
   // });
 }
 
-export async function sendErrorNotification(err: unknown) {
+export async function sendErrorEmailNotification(err: unknown) {
   if (Deno.env.get("ENV") === "dev") {
     return;
   }

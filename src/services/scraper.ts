@@ -2,7 +2,7 @@
 import { load } from "cheerio";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { currentDateAndTime, currentTime } from "./time-and-date.ts";
-import { sendErrorNotification, sendWatchNotification } from "./notification.ts";
+import { sendEmailNotification, sendErrorEmailNotification } from "./email-notification.ts";
 import { errorLogger, infoLogger } from "./logger.ts";
 import { getAllActiveWatches, updateStoredWatches } from "../database/watch.ts";
 import { INTERVAL_IN_MS } from "../constants/config.ts";
@@ -140,13 +140,13 @@ setInterval(compareStoredWithScraped, INTERVAL_IN_MS);
 
 async function handleNewScrapedWatch(newScrapedWatches: ScrapedWatch[]) {
   for (const watch of newScrapedWatches) {
-    await sendEmailNotification(watch);
+    await sendNotification(watch);
   }
 }
 
-async function sendEmailNotification(watch: ScrapedWatch) {
+async function sendNotification(watch: ScrapedWatch) {
   try {
-    await sendWatchNotification(emailText(watch));
+    await sendEmailNotification(emailText(watch));
 
     infoLogger.info({ message: `Email sent with watch: ${JSON.stringify(watch)}` });
 
@@ -159,7 +159,7 @@ async function sendEmailNotification(watch: ScrapedWatch) {
       stacktrace: err,
     });
 
-    await sendErrorNotification(err);
+    await sendErrorEmailNotification(err);
   }
 }
 

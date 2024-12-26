@@ -2,31 +2,30 @@ import type { ApiStatus } from "../models/status.dto.ts";
 import { formatBytes, getUptime } from "../services/status.ts";
 import { Context, Router } from "@oak/oak";
 import { INTERVAL_IN_MIN } from "../constants/config.ts";
+import { currentTime } from "../services/time-and-date.ts";
 
 const apiStatusRoutes = new Router();
-const connectedClients = new Map<string, WebSocket>();
 
 const STATUS_BASE_URL = "/api";
 
 apiStatusRoutes.get(`${STATUS_BASE_URL}/api-status`, (context: Context) => {
   const socket = context.upgrade();
-  const username = context.request.url.searchParams.get("username") ?? "default-username";
-  connectedClients.set(username, socket);
 
   socket.onclose = () => {
-    connectedClients.delete(username);
-    console.log(`Client ${username} disconnected!`);
+    console.log(`A client disconnected @ ${currentTime()}`);
   };
 
-  socket.onopen = () => broadcastApiStatus();
+  socket.onopen = () => {
+    return setInterval(() => {
+      broadcastApiStatus(socket);
+    }, 1_000);
+  };
 });
 
-function broadcastApiStatus() {
+function broadcastApiStatus(socket: WebSocket) {
   const apiStatus = getApiStatus();
 
-  connectedClients.forEach((client) => {
-    client.send(JSON.stringify(apiStatus));
-  });
+  socket.send(JSON.stringify(apiStatus));
 }
 
 const getApiStatus = (): ApiStatus => ({
@@ -35,9 +34,5 @@ const getApiStatus = (): ApiStatus => ({
   memoryUsage: formatBytes(Deno.memoryUsage().rss),
   uptime: getUptime(),
 });
-
-setInterval(() => {
-  broadcastApiStatus();
-}, 1_000);
 
 export default apiStatusRoutes;

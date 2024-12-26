@@ -6,11 +6,17 @@ import { errorLogger } from "../services/logger.ts";
 import { insertNewNotification } from "./notification.ts";
 
 export const getAllWatches = () => runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch ORDER BY added`);
+
 export const getAllActiveWatches = () => runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
+
 export const deleteWatchById = (id: string) => runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
 
 export function toggleActiveStatus(isActive: boolean, id: string) {
   return runDbQuery(sql<WatchDbRes[]>`UPDATE watch SET active = ${isActive} WHERE id = ${id} RETURNING *`);
+}
+
+export function toggleAllStatuses(ids: string[], activateAll: boolean) {
+  return runDbQuery(sql`UPDATE watch SET active = ${activateAll} WHERE id in ${sql(ids)} RETURNING *`);
 }
 
 export function saveWatch(label: string, watchToScrape: string, scrapedWatches: ScrapedWatch[]) {
@@ -34,7 +40,7 @@ export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: s
     const [notification] = await insertNewNotification(watchId);
 
     return {
-      result: [watch, notification],
+      result: { watch, notification },
       error: null,
     };
   }).catch((err: unknown) => {
