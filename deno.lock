@@ -22,6 +22,7 @@
     "jsr:@std/uuid@^1.0.4": "1.0.4",
     "jsr:@tajpouria/cors@^1.2.1": "1.2.1",
     "npm:@types/cheerio@~0.22.35": "0.22.35",
+    "npm:@types/node@*": "22.5.4",
     "npm:@types/nodemailer@*": "6.4.17",
     "npm:cheerio@1.0.0": "1.0.0",
     "npm:nodemailer@^6.9.15": "6.9.16",

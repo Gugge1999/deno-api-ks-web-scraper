@@ -6,6 +6,8 @@ import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
 import { compareStoredWithScraped } from "./services/scraper.ts";
 
+console.log(`Init api @ ${currentTime()}\n`);
+
 const app = new Application();
 
 app.use(oakCors());
@@ -18,8 +20,6 @@ app.use(apiStatusRoutes.allowedMethods());
 
 app.use(scraperRoutes.routes());
 app.use(scraperRoutes.allowedMethods());
-
-console.log(`Init api @ ${currentTime()}\n`);
 
 const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 

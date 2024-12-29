@@ -120,6 +120,7 @@ scraperRoutes
     context.response.body = returnDto;
   })
   .patch(`${BEVAKNINGAR_BASE_URL}/toggle-all`, async (context) => {
+    // TODO: Ska validering av body vara en egen funktion?
     try {
       await context.request.body.json();
     } catch (e) {
