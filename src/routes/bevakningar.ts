@@ -8,12 +8,12 @@ import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { getAllNotifications } from "../database/notification.ts";
 import { Notification } from "../models/notification.ts";
 
-const scraperRoutes = new Router();
-
-const BEVAKNINGAR_BASE_URL = "/api/bevakningar";
+const scraperRoutes = new Router({
+  prefix: "/api/bevakningar",
+});
 
 scraperRoutes
-  .get(`${BEVAKNINGAR_BASE_URL}/all-watches`, async (context) => {
+  .get(`/all-watches`, async (context) => {
     const [allWatches, notifications] = await Promise.all([await getAllWatches(), await getAllNotifications()]);
 
     if (allWatches.error || notifications.error || notifications.result === null) {
@@ -29,7 +29,7 @@ scraperRoutes
 
     context.response.body = returnDto;
   })
-  .delete(`${BEVAKNINGAR_BASE_URL}/delete-watch/:id`, async (context) => {
+  .delete(`/delete-watch/:id`, async (context) => {
     if (!context?.params?.id || !validate(context?.params?.id)) {
       throw new httpErrors.UnprocessableEntity("Ogiltigt id för bevakning");
     }
@@ -42,7 +42,7 @@ scraperRoutes
 
     context.response.body = { deleteWatchId: context.params.id };
   })
-  .put(`${BEVAKNINGAR_BASE_URL}/toggle-active-status`, async (context) => {
+  .put(`/toggle-active-status`, async (context) => {
     try {
       await context.request.body.json();
     } catch (e) {
@@ -71,7 +71,7 @@ scraperRoutes
 
     context.response.body = response;
   })
-  .post(`${BEVAKNINGAR_BASE_URL}/save-watch`, async (context) => {
+  .post(`/save-watch`, async (context) => {
     try {
       await context.request.body.json();
     } catch (e) {
@@ -119,7 +119,7 @@ scraperRoutes
 
     context.response.body = returnDto;
   })
-  .patch(`${BEVAKNINGAR_BASE_URL}/toggle-all`, async (context) => {
+  .patch(`/toggle-all`, async (context) => {
     // TODO: Ska validering av body vara en egen funktion?
     try {
       await context.request.body.json();

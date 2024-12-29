@@ -4,11 +4,11 @@ import { Context, Router } from "@oak/oak";
 import { INTERVAL_IN_MIN } from "../constants/config.ts";
 import { currentTime } from "../services/time-and-date.ts";
 
-const apiStatusRoutes = new Router();
+const apiStatusRoutes = new Router({
+  prefix: "/api",
+});
 
-const STATUS_BASE_URL = "/api";
-
-apiStatusRoutes.get(`${STATUS_BASE_URL}/api-status`, (context: Context) => {
+apiStatusRoutes.get(`/api-status`, (context: Context) => {
   const socket = context.upgrade();
 
   socket.onclose = () => {
