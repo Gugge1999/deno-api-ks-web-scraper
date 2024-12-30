@@ -14,7 +14,7 @@ export async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
     const result = await query;
 
     return {
-      result,
+      result: result,
       error: null,
     };
   } catch (error) {
@@ -22,7 +22,7 @@ export async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
 
     return {
       result: null,
-      error,
+      error: error,
     };
   }
 }
