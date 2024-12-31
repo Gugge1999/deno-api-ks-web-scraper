@@ -101,9 +101,10 @@ export async function compareStoredWithScraped() {
 
   const activeWatchesLength = getAllWatchesDbRes.result.length;
 
-  activeWatchesLength === 0
-    ? console.log(`No active watches @ ${currentDateAndTime()}`)
-    : console.log(`Scraping ${activeWatchesLength} ${activeWatchesLength === 1 ? "watch" : "watches"} @ ${currentDateAndTime()}`);
+  activeWatchesLength === 0 ? console.log(`No active watches @ %c${currentDateAndTime()}`, "color: deepskyblue") : console.log(
+    `Scraping ${activeWatchesLength} ${activeWatchesLength === 1 ? "watch" : "watches"} @ %c${currentDateAndTime()}`,
+    "color: deepskyblue",
+  );
 
   const storedActiveWatches = getAllWatchesDbRes.result;
   for (const watch of storedActiveWatches) {

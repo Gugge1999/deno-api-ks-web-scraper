@@ -6,7 +6,7 @@ import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
 import { compareStoredWithScraped } from "./services/scraper.ts";
 
-console.log(`Init api @ ${currentTime()}\n`);
+console.log(`Init api @%c ${currentTime()}`, "color: green");
 
 const app = new Application();
 

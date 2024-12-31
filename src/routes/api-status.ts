@@ -12,7 +12,7 @@ apiStatusRoutes.get(`/status`, (context: Context) => {
   const socket = context.upgrade();
 
   socket.onclose = () => {
-    console.log(`A client disconnected @ ${currentTime()}`);
+    console.log(`A client disconnected @ %c${currentTime()}`, "color: orange");
   };
 
   socket.onopen = () => setInterval(() => broadcastApiStatus(socket), 1_000);
