@@ -6,6 +6,7 @@ EXPOSE 8080
 WORKDIR /app
 
 # TODO: Bäst praxis är inte köra som root. Detta kräver dock att mappen redan är skapat när koden checkas ut.
+# Det gör också att COPY deno.lock deno.json ./ inte fungerar i github actions
 # Prefer not to run as root.
 #USER deno
 
