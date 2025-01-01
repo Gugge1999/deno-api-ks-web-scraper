@@ -27,6 +27,7 @@
     "npm:bcrypt@*": "5.1.1",
     "npm:bcrypt@^5.1.1": "5.1.1",
     "npm:cheerio@1.0.0": "1.0.0",
+    "npm:jose@^5.9.6": "5.9.6",
     "npm:nodemailer@^6.9.15": "6.9.16",
     "npm:path-to-regexp@6.2.1": "6.2.1",
     "npm:postcss-load-config@4.0.2": "4.0.2",
@@ -424,6 +425,9 @@
     "is-stream@2.0.1": {
       "integrity": "sha512-hFoiJiTl63nn+kstHGBtewWSKnQLpyb155KHheA1l39uvtO9nWIop1p3udqPcUd/xbF1VLMO4n7OI6p7RbngDg=="
     },
+    "jose@5.9.6": {
+      "integrity": "sha512-AMlnetc9+CV9asI19zHmrgS/WYsWUwCn2R7RzlbJWD7F9eWYUTGyBmU9o6PxngtLGOiDGPRu+Uc4fhKzbpteZQ=="
+    },
     "kuler@2.0.0": {
       "integrity": "sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A=="
     },
@@ -722,6 +726,7 @@
       "jsr:@tajpouria/cors@^1.2.1",
       "npm:bcrypt@^5.1.1",
       "npm:cheerio@1.0.0",
+      "npm:jose@^5.9.6",
       "npm:nodemailer@^6.9.15",
       "npm:postgres-shift@0.1",
       "npm:postgres@3.4.5",

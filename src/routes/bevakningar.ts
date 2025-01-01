@@ -166,8 +166,9 @@ function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification
 export async function validateBody(context: any) {
   try {
     await context.request.body.json();
-  } catch (e) {
-    throw new httpErrors.UnprocessableEntity(`Body krävs. Error: ${e}`);
+  } catch (e: unknown) {
+    // TODO: Den borde heta något annat är dbError, kanske scraperError eller om det ska vara en union?
+    throw new httpErrors.UnprocessableEntity(`Body behöver finnas. dbError: ${e}`);
   }
 }
 
