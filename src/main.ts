@@ -5,6 +5,7 @@ import errorMiddleware from "./middleware/error-middleware.ts";
 import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
 import { compareStoredWithScraped } from "./services/scraper.ts";
+import userRoutes from "./routes/user.ts";
 
 console.log(`Init api @%c ${currentTime()}`, "color: green");
 
@@ -20,6 +21,9 @@ app.use(apiStatusRoutes.allowedMethods());
 
 app.use(scraperRoutes.routes());
 app.use(scraperRoutes.allowedMethods());
+
+app.use(userRoutes.routes());
+app.use(userRoutes.allowedMethods());
 
 const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 

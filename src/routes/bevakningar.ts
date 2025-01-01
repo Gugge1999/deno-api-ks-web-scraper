@@ -1,4 +1,4 @@
-import { httpErrors, Router, RouterContext } from "@oak/oak";
+import { httpErrors, Router } from "@oak/oak";
 import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus, toggleAllStatuses } from "../database/watch.ts";
 import { validate } from "jsr:@std/uuid";
 import { WatchAndNotificationDto } from "../models/watch-dto.ts";
@@ -7,7 +7,6 @@ import { scrapeWatchInfo } from "../services/scraper.ts";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { getAllNotifications } from "../database/notification.ts";
 import { Notification } from "../models/notification.ts";
-import { Context } from "npm:postcss-load-config@4.0.2";
 
 const scraperRoutes = new Router({
   prefix: "/api/bevakningar",
@@ -164,7 +163,7 @@ function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification
 }
 
 // TODO: Går den att typa bättre?
-async function validateBody(context: any) {
+export async function validateBody(context: any) {
   try {
     await context.request.body.json();
   } catch (e) {

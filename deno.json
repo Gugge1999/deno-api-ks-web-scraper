@@ -11,12 +11,14 @@
     "@std/uuid": "jsr:@std/uuid@^1.0.4",
     "@tajpouria/cors": "jsr:@tajpouria/cors@^1.2.1",
 
+    "bcrypt": "npm:bcrypt@^5.1.1",
+    "cheerio": "npm:cheerio@1.0.0",
+    "nodemailer": "npm:nodemailer@^6.9.15",
     "postgres": "npm:postgres@3.4.5",
     "postgres-shift": "npm:postgres-shift@^0.1.0",
-    "winston": "npm:winston@^3.17.0",
-    "cheerio": "npm:cheerio@1.0.0",
-    "nodemailer": "npm:nodemailer@^6.9.15"
+    "winston": "npm:winston@^3.17.0"
   },
+  "nodeModulesDir": "auto",
   "fmt": {
     "lineWidth": 135
   }

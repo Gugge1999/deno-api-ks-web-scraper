@@ -1,10 +1,10 @@
 import { errorLogger } from "../services/logger.ts";
 import "jsr:@std/dotenv/load";
-import postgres from "postgres";
+import postgres, { PostgresError } from "postgres";
 
 interface DbResponse<T> {
   result: Awaited<T> | null;
-  error: unknown;
+  error: PostgresError | unknown;
 }
 
 export const sql = getDbUrl();
