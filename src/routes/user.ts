@@ -1,17 +1,15 @@
 import { httpErrors } from "@oak/oak";
 import { Router } from "@oak/oak/router";
-// TODO: Försök att använda något annat bibliotek för bcrypt. Den kräver att node_modules finns och att nodeModulesDir behöver finnas i deno.json
-// @deno-types="npm:@types/bcrypt@^5.0.2"
-import { genSalt, hash as bcryptHash } from "bcrypt";
 import { JWTPayload, SignJWT } from "jose";
 import { Buffer } from "node:buffer";
 import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+
 import { getUserByEmail, insertNewUser } from "../database/user.ts";
 import { validateBody } from "./bevakningar.ts";
 
 const keyLength = 32;
 
-export const hash = async (password: string): Promise<string> => {
+export const hash = (password: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     // generate random 16 bytes long salt - recommended by NodeJS Docs
     const salt = randomBytes(16).toString("hex");
@@ -26,7 +24,7 @@ export const hash = async (password: string): Promise<string> => {
   });
 };
 
-export const compare = async (password: string, hash: string): Promise<boolean> => {
+export const compare = (password: string, hash: string): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     const [salt, hashKey] = hash.split(".");
     // we need to pass buffer values to timingSafeEqual
@@ -41,6 +39,7 @@ export const compare = async (password: string, hash: string): Promise<boolean> 
   });
 };
 
+// TODO: Den här borde sättas i .env
 const secret = new TextEncoder().encode("secret-that-no-one-knows");
 
 const userRoutes = new Router({
@@ -70,6 +69,8 @@ userRoutes.post(`/register`, async (context) => {
   // TODO: Ska det vara en random guid eller id från app_user?
   const token = await createJWT({ userId: 123, username: "john_doe" });
 
+  context.cookies.set("jwt", token, { httpOnly: true });
+
   context.response.body = {
     user: newUser.result?.[0],
   };
@@ -94,12 +95,12 @@ userRoutes.post(`/login`, async (context) => {
     throw new httpErrors.BadRequest("Ogiltigt användarnamn eller lösenord");
   }
 
-  context.response.body = true;
+  context.response.body = "";
 });
 
 async function generateHashedPassword(pwd: string) {
-  const salt = await genSalt(10);
-  const hashedPass = await bcryptHash(pwd, salt);
+  // const salt = await genSalt(10);
+  const hashedPass = await hash(pwd);
 
   return hashedPass;
 }
