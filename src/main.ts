@@ -1,10 +1,12 @@
-import { Application } from "@oak/oak";
 import { oakCors } from "@tajpouria/cors";
-import { currentTime } from "./services/time-and-date.ts";
+import { Application } from "@oak/oak";
+import "jsr:@std/dotenv/load";
+
+import { compareStoredWithScraped } from "./services/scraper.ts";
 import errorMiddleware from "./middleware/error-middleware.ts";
+import { currentTime } from "./services/time-and-date.ts";
 import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
-import { compareStoredWithScraped } from "./services/scraper.ts";
 import userRoutes from "./routes/user.ts";
 
 console.log(`Init api @%c ${currentTime()}`, "color: green");
@@ -15,7 +17,6 @@ app.use(oakCors());
 
 app.use(errorMiddleware);
 
-//OBS: Lägg märke till routes() med parenteser
 app.use(apiStatusRoutes.routes());
 app.use(apiStatusRoutes.allowedMethods());
 
@@ -27,6 +28,4 @@ app.use(userRoutes.allowedMethods());
 
 const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 
-await app.listen({ port: denoPort });
-
-await compareStoredWithScraped();
+await Promise.all([app.listen({ port: denoPort }), compareStoredWithScraped()]);
