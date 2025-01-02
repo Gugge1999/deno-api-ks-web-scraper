@@ -6,23 +6,7 @@ import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 import { getUserByEmail, insertNewUser } from "../database/user.ts";
 import { validateBody } from "./bevakningar.ts";
-
-const keyLength = 32;
-
-function hash(password: string): string {
-  // generate random 16 bytes long salt - recommended by NodeJS Docs
-  const salt = randomBytes(16).toString("hex");
-  const derivedKey = scryptSync(password, salt, keyLength);
-
-  return `${salt}.${derivedKey.toString("hex")}`;
-}
-
-function comparePasswords(password: string, hash: string): boolean {
-  const [salt, hashKey] = hash.split(".");
-  const hashKeyBuff = Buffer.from(hashKey, "hex");
-  const derivedKey = scryptSync(password, salt, keyLength);
-  return timingSafeEqual(hashKeyBuff, derivedKey);
-}
+import { keyLength } from "../constants/config.ts";
 
 // TODO: Den här borde sättas i .env
 const secret = new TextEncoder().encode("secret-that-no-one-knows");
@@ -38,7 +22,7 @@ userRoutes.post(`/register`, async (context) => {
     throw new httpErrors.BadRequest("Lösenordet måste vara minst 5 tecken långt");
   }
 
-  const hashedPassword = await generateHashedPassword(password);
+  const hashedPassword = hash(password);
   const newUser = await insertNewUser(email, hashedPassword);
 
   if (
@@ -74,7 +58,7 @@ userRoutes.post(`/login`, async (context) => {
     throw new httpErrors.BadRequest("Email finns inte registered");
   }
 
-  const passwordMatches = await validatePassword(password, user.result?.[0].password ?? "");
+  const passwordMatches = comparePasswords(password, user.result?.[0].password ?? "");
 
   if (!passwordMatches) {
     throw new httpErrors.BadRequest("Ogiltigt användarnamn eller lösenord");
@@ -83,15 +67,19 @@ userRoutes.post(`/login`, async (context) => {
   context.response.body = "";
 });
 
-async function generateHashedPassword(pwd: string) {
-  // const salt = await genSalt(10);
-  const hashedPass = await hash(pwd);
+function hash(password: string): string {
+  // generate random 16 bytes long salt - recommended by NodeJS Docs
+  const salt = randomBytes(16).toString("hex");
+  const derivedKey = scryptSync(password, salt, keyLength);
 
-  return hashedPass;
+  return `${salt}.${derivedKey.toString("hex")}`;
 }
 
-async function validatePassword(pwd: string, storedPassword: string) {
-  return await comparePasswords(pwd, storedPassword);
+function comparePasswords(password: string, hash: string): boolean {
+  const [salt, hashKey] = hash.split(".");
+  const hashKeyBuff = Buffer.from(hashKey, "hex");
+  const derivedKey = scryptSync(password, salt, keyLength);
+  return timingSafeEqual(hashKeyBuff, derivedKey);
 }
 
 async function createJWT(payload: JWTPayload): Promise<string> {
