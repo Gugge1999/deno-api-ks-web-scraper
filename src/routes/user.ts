@@ -6,30 +6,40 @@ import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 import { getUserByEmail, insertNewUser } from "../database/user.ts";
 import { validateBody } from "./bevakningar.ts";
-import { keyLength } from "../constants/config.ts";
 import { errorLogger } from "../services/logger.ts";
 
 // TODO: Den här borde sättas i .env
 const secret = new TextEncoder().encode("secret-that-no-one-knows");
+const keyLength = 32;
 
 const userRoutes = new Router({
   prefix: "/api/user",
 });
 
 userRoutes.post(`/register`, async (context) => {
-  const { email, password } = await validateBodyUser(context);
+  const { username, email, password } = await validateBodyUser(context);
 
   if (password.length < 5) {
     throw new httpErrors.BadRequest("Lösenordet måste vara minst 5 tecken långt");
   }
 
   const hashedPassword = hash(password);
-  const newUser = await insertNewUser(email, hashedPassword);
+  const newUser = await insertNewUser(username, email, hashedPassword);
 
+  // TODO: Fungerar det med username?
   if (
-    newUser?.error && typeof newUser.error === "object" && "routine" in newUser.error && newUser.error.routine === "_bt_check_unique"
+    newUser?.error && typeof newUser.error === "object" && "constraint_name" in newUser.error &&
+    newUser.error.constraint_name === "unique_email"
   ) {
     throw new httpErrors.BadRequest(`Användare med email: ${email} finns redan`);
+  }
+
+  // TODO: Fungerar det med username?
+  if (
+    newUser?.error && typeof newUser.error === "object" && "constraint_name" in newUser.error &&
+    newUser.error.constraint_name === "unique_username"
+  ) {
+    throw new httpErrors.BadRequest(`Användare med användarnamn: ${email} finns redan`);
   }
 
   if (newUser.error || newUser.result?.length === 0) {
@@ -136,16 +146,17 @@ async function verifyJwt(token: string | undefined): Promise<JWTPayload | null> 
 async function validateBodyUser(context: any) {
   await validateBody(context);
 
-  const { email, password }: {
+  const { username, email, password }: {
+    username?: string;
     email?: string;
     password?: string;
   } = await context.request.body.json();
 
-  if (email === undefined || password === undefined) {
-    throw new httpErrors.UnprocessableEntity("email och password behöver finnas i body");
+  if (username === undefined || email === undefined || password === undefined) {
+    throw new httpErrors.UnprocessableEntity("username, email och password behöver finnas i body");
   }
 
-  return { email, password };
+  return { username, email, password };
 }
 
 export default userRoutes;

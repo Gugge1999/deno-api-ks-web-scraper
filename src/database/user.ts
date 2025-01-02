@@ -1,11 +1,11 @@
 import { runDbQuery, sql } from "./query.ts";
 import { User } from "../models/user.ts";
 
-export function insertNewUser(email: string, password: string) {
+export function insertNewUser(username: string, email: string, password: string) {
   const newUser = sql<User[]>`
-    INSERT INTO app_user(email, password)
+    INSERT INTO app_user(username, email, password)
         VALUES
-            (${email}, ${password})
+            (${username}, ${email}, ${password})
                 RETURNING *`;
 
   return runDbQuery(newUser);
