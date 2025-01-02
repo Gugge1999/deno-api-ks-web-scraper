@@ -9,7 +9,7 @@ import { validateBody } from "./bevakningar.ts";
 
 const keyLength = 32;
 
-export const hash = (password: string): Promise<string> => {
+function hash(password: string): Promise<string> {
   return new Promise((resolve, reject) => {
     // generate random 16 bytes long salt - recommended by NodeJS Docs
     const salt = randomBytes(16).toString("hex");
@@ -22,9 +22,9 @@ export const hash = (password: string): Promise<string> => {
       resolve(`${salt}.${derivedKey.toString("hex")}`);
     });
   });
-};
+}
 
-export const compare = (password: string, hash: string): Promise<boolean> => {
+function comparePasswords(password: string, hash: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const [salt, hashKey] = hash.split(".");
     // we need to pass buffer values to timingSafeEqual
@@ -37,7 +37,7 @@ export const compare = (password: string, hash: string): Promise<boolean> => {
       resolve(timingSafeEqual(hashKeyBuff, derivedKey));
     });
   });
-};
+}
 
 // TODO: Den här borde sättas i .env
 const secret = new TextEncoder().encode("secret-that-no-one-knows");
@@ -106,7 +106,7 @@ async function generateHashedPassword(pwd: string) {
 }
 
 async function validatePassword(pwd: string, storedPassword: string) {
-  return await compare(pwd, storedPassword);
+  return await comparePasswords(pwd, storedPassword);
 }
 
 async function createJWT(payload: JWTPayload): Promise<string> {
