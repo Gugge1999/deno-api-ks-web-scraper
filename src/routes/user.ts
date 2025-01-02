@@ -2,41 +2,26 @@ import { httpErrors } from "@oak/oak";
 import { Router } from "@oak/oak/router";
 import { JWTPayload, SignJWT } from "jose";
 import { Buffer } from "node:buffer";
-import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 import { getUserByEmail, insertNewUser } from "../database/user.ts";
 import { validateBody } from "./bevakningar.ts";
 
 const keyLength = 32;
 
-function hash(password: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    // generate random 16 bytes long salt - recommended by NodeJS Docs
-    const salt = randomBytes(16).toString("hex");
+function hash(password: string): string {
+  // generate random 16 bytes long salt - recommended by NodeJS Docs
+  const salt = randomBytes(16).toString("hex");
+  const derivedKey = scryptSync(password, salt, keyLength);
 
-    scrypt(password, salt, keyLength, (err, derivedKey) => {
-      if (err) {
-        reject(err);
-      }
-      // derivedKey is of type Buffer
-      resolve(`${salt}.${derivedKey.toString("hex")}`);
-    });
-  });
+  return `${salt}.${derivedKey.toString("hex")}`;
 }
 
-function comparePasswords(password: string, hash: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const [salt, hashKey] = hash.split(".");
-    // we need to pass buffer values to timingSafeEqual
-    const hashKeyBuff = Buffer.from(hashKey, "hex");
-    scrypt(password, salt, keyLength, (err, derivedKey) => {
-      if (err) {
-        reject(err);
-      }
-      // compare the new supplied password with the hashed password using timeSafeEqual
-      resolve(timingSafeEqual(hashKeyBuff, derivedKey));
-    });
-  });
+function comparePasswords(password: string, hash: string): boolean {
+  const [salt, hashKey] = hash.split(".");
+  const hashKeyBuff = Buffer.from(hashKey, "hex");
+  const derivedKey = scryptSync(password, salt, keyLength);
+  return timingSafeEqual(hashKeyBuff, derivedKey);
 }
 
 // TODO: Den här borde sättas i .env
