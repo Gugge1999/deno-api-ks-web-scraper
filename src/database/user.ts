@@ -14,3 +14,7 @@ export function insertNewUser(username: string, email: string, password: string)
 export function getUserByEmail(email: string) {
   return runDbQuery(sql<User[]>`SELECT * FROM app_user WHERE email = ${email}`);
 }
+
+export function deleteUserById(id: string) {
+  return runDbQuery(sql<User[]>`DELETE FROM app_user WHERE id = ${id}`);
+}

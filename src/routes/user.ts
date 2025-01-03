@@ -1,12 +1,13 @@
 import { httpErrors } from "@oak/oak";
 import { Router } from "@oak/oak/router";
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
+import { validate } from "jsr:@std/uuid";
 import { Buffer } from "node:buffer";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
-import { getUserByEmail, insertNewUser } from "../database/user.ts";
-import { validateBody } from "./bevakningar.ts";
+import { deleteUserById, getUserByEmail, insertNewUser } from "../database/user.ts";
 import { errorLogger } from "../services/logger.ts";
+import { validateBody } from "./bevakningar.ts";
 
 // TODO: Den här borde sättas i .env
 const secret = new TextEncoder().encode("secret-that-no-one-knows");
@@ -26,20 +27,17 @@ userRoutes.post(`/register`, async (context) => {
   const hashedPassword = hash(password);
   const newUser = await insertNewUser(username, email, hashedPassword);
 
-  // TODO: Fungerar det med username?
   if (
     newUser?.error && typeof newUser.error === "object" && "constraint_name" in newUser.error &&
-    newUser.error.constraint_name === "unique_email"
+    newUser.error.constraint_name
   ) {
-    throw new httpErrors.BadRequest(`Användare med email: ${email} finns redan`);
-  }
+    if (newUser.error.constraint_name === "unique_email") {
+      throw new httpErrors.BadRequest(`Användare med email: ${email} finns redan`);
+    }
 
-  // TODO: Fungerar det med username?
-  if (
-    newUser?.error && typeof newUser.error === "object" && "constraint_name" in newUser.error &&
-    newUser.error.constraint_name === "unique_username"
-  ) {
-    throw new httpErrors.BadRequest(`Användare med användarnamn: ${email} finns redan`);
+    if (newUser.error.constraint_name === "unique_username") {
+      throw new httpErrors.BadRequest(`Användare med användarnamn: ${username} finns redan`);
+    }
   }
 
   if (newUser.error || newUser.result?.length === 0) {
@@ -89,10 +87,38 @@ userRoutes.post(`/login`, async (context) => {
   context.response.body = "";
 });
 
-// TODO: Skapa endpoint för att logga ut, glömt lösenord, uppdatera lösenord och radera användare
+// TODO: Här gäller det att kolla att rätt användare är inloggad
+userRoutes.post(`/delete:id`, async (context) => {
+  if (!context?.params?.id || !validate(context?.params?.id)) {
+    throw new httpErrors.UnprocessableEntity("Ogiltigt id för att radera användare");
+  }
+
+  // TODO: Det är nog bättre om det här en middleware. Annars behöver man göra detta i varje endpoint
+  const jwtToken = await context.cookies.get("jwt");
+
+  if (jwtToken === undefined) {
+    throw new httpErrors.Unauthorized("Ingen jwt token hittades");
+  }
+
+  const jwtVerified = await verifyJwt(jwtToken);
+
+  if (jwtVerified === null) {
+    throw new httpErrors.Unauthorized("Ogiltig jwt token");
+  }
+
+  const user = await deleteUserById(context.params.id);
+
+  if (user.error) {
+    throw new httpErrors.Unauthorized("Kunde inte hämta användare");
+  }
+
+  context.response.body = "";
+});
+
+// TODO: Skapa endpoint för att logga ut, glömt lösenord, uppdatera lösenord
 function hash(password: string): string {
   try {
-    // generate random 16 bytes long salt - recommended by NodeJS Docs
+    // Skapa slumpmässig 16 bytes salt, rekommenderat av Node.js Docs
     const salt = randomBytes(16).toString("hex");
     const derivedKey = scryptSync(password, salt, keyLength);
 
@@ -118,11 +144,7 @@ function comparePasswords(password: string, hash: string): boolean {
 }
 
 async function createJwt(payload: JWTPayload): Promise<string> {
-  const jwt = await new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("1h")
-    .sign(secret);
+  const jwt = await new SignJWT(payload).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime("24h").sign(secret);
 
   return jwt;
 }
