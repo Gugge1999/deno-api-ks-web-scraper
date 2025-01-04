@@ -5,7 +5,7 @@ import { validate } from "jsr:@std/uuid";
 import { Buffer } from "node:buffer";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
-import { deleteUserById, getUserByEmail, insertNewUser } from "../database/user.ts";
+import { deleteUserById, getUserByEmail, getUserById, getUserByUsername, insertNewUser } from "../database/user.ts";
 import { errorLogger } from "../services/logger.ts";
 import { validateBody } from "./bevakningar.ts";
 
@@ -24,7 +24,7 @@ userRoutes.post(`/register`, async (context) => {
     throw new httpErrors.BadRequest("Lösenordet måste vara minst 5 tecken långt");
   }
 
-  const hashedPassword = hash(password);
+  const hashedPassword = hashPassword(password);
   const newUser = await insertNewUser(username, email, hashedPassword);
 
   if (
@@ -45,16 +45,96 @@ userRoutes.post(`/register`, async (context) => {
   }
 
   // TODO: Ska det vara en random guid eller id från app_user?
-  const token = await createJwt({ userId: 123, username: "john_doe" });
+  const token = await createJwt({ userId: 123, username: username });
 
   context.cookies.set("jwt", token, { httpOnly: true });
 
-  context.response.body = newUser.result?.[0];
+  const res = {
+    ...newUser.result?.[0],
+    jwtToken: token,
+  };
+
+  context.response.body = res;
 });
 
 // TODO: Vid inloggning bör inte jwt finnas. När man loggar in borde den sättas
 userRoutes.post(`/login`, async (context) => {
-  const { email, password } = await validateBodyUser(context);
+  const { username, password } = await validateBodyUser(context);
+
+  const jwtToken = await context.cookies.get("jwt");
+
+  if (jwtToken === undefined) {
+    throw new httpErrors.Unauthorized("Ingen jwt token hittades");
+  }
+
+  const jwtVerified = await verifyJwt(jwtToken);
+
+  if (jwtVerified === null) {
+    throw new httpErrors.Unauthorized("Ogiltig jwt token");
+  }
+
+  const user = await getUserByUsername(username);
+
+  if (user.error) {
+    throw new httpErrors.Unauthorized("Kunde inte hämta användare");
+  }
+
+  if (user.result?.length === 0) {
+    throw new httpErrors.BadRequest("Email finns inte registered");
+  }
+
+  const passwordMatches = comparePasswords(password, user.result?.[0].password ?? "");
+
+  if (!passwordMatches) {
+    throw new httpErrors.BadRequest("Ogiltigt användarnamn eller lösenord");
+  }
+
+  context.response.body = "";
+});
+
+// TODO: Här gäller det att kolla att rätt användare är inloggad
+userRoutes.delete(`/delete/:id`, async (context) => {
+  if (!context?.params?.id || !validate(context?.params?.id)) {
+    throw new httpErrors.UnprocessableEntity("Ogiltigt id för att radera användare");
+  }
+
+  // // TODO: Det är nog bättre om det här en middleware. Annars behöver man göra detta i varje endpoint
+  // const jwtToken = await context.cookies.get("jwt");
+  //
+  // if (jwtToken === undefined) {
+  //   throw new httpErrors.Unauthorized("Ingen jwt token hittades");
+  // }
+  //
+  // const jwtVerified = await verifyJwt(jwtToken);
+  //
+  // if (jwtVerified === null) {
+  //   throw new httpErrors.Unauthorized("Ogiltig jwt token");
+  // }
+
+  const user = await getUserById(context.params.id);
+
+  if (user.result?.length === 0) {
+    throw new httpErrors.BadRequest(`Kunde inte hitta användare med id: ${context.params.id}`);
+  }
+
+  const deletedUser = await deleteUserById(context.params.id);
+
+  if (deletedUser.error) {
+    throw new httpErrors.InternalServerError("Kunde inte radera användare");
+  }
+
+  context.response.body = {};
+});
+
+// TODO: Här gäller det att kolla att rätt användare är inloggad
+userRoutes.post(`/reset-password`, async (context) => {
+  await validateBody(context);
+
+  const { email }: { email?: string } = await context.request.body.json();
+
+  if (email === undefined) {
+    throw new httpErrors.UnprocessableEntity("Email behöver finnas i body");
+  }
 
   const jwtToken = await context.cookies.get("jwt");
 
@@ -78,45 +158,11 @@ userRoutes.post(`/login`, async (context) => {
     throw new httpErrors.BadRequest("Email finns inte registered");
   }
 
-  const passwordMatches = comparePasswords(password, user.result?.[0].password ?? "");
-
-  if (!passwordMatches) {
-    throw new httpErrors.BadRequest("Ogiltigt användarnamn eller lösenord");
-  }
-
-  context.response.body = "";
-});
-
-// TODO: Här gäller det att kolla att rätt användare är inloggad
-userRoutes.post(`/delete:id`, async (context) => {
-  if (!context?.params?.id || !validate(context?.params?.id)) {
-    throw new httpErrors.UnprocessableEntity("Ogiltigt id för att radera användare");
-  }
-
-  // TODO: Det är nog bättre om det här en middleware. Annars behöver man göra detta i varje endpoint
-  const jwtToken = await context.cookies.get("jwt");
-
-  if (jwtToken === undefined) {
-    throw new httpErrors.Unauthorized("Ingen jwt token hittades");
-  }
-
-  const jwtVerified = await verifyJwt(jwtToken);
-
-  if (jwtVerified === null) {
-    throw new httpErrors.Unauthorized("Ogiltig jwt token");
-  }
-
-  const user = await deleteUserById(context.params.id);
-
-  if (user.error) {
-    throw new httpErrors.Unauthorized("Kunde inte hämta användare");
-  }
-
   context.response.body = "";
 });
 
 // TODO: Skapa endpoint för att logga ut, glömt lösenord, uppdatera lösenord
-function hash(password: string): string {
+function hashPassword(password: string): string {
   try {
     // Skapa slumpmässig 16 bytes salt, rekommenderat av Node.js Docs
     const salt = randomBytes(16).toString("hex");
@@ -165,7 +211,7 @@ async function verifyJwt(token: string | undefined): Promise<JWTPayload | null> 
 }
 
 // TODO: Typa bättre, kanske unknown?
-async function validateBodyUser(context: any) {
+async function validateBodyUser(context: any): Promise<{ username: string; email: string; password: string }> {
   await validateBody(context);
 
   const { username, email, password }: {

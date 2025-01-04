@@ -15,6 +15,18 @@ export function getUserByEmail(email: string) {
   return runDbQuery(sql<User[]>`SELECT * FROM app_user WHERE email = ${email}`);
 }
 
+export function getUserByUsername(username: string) {
+  return runDbQuery(sql<User[]>`SELECT * FROM app_user WHERE username = ${username}`);
+}
+
+export function getUserById(id: string) {
+  return runDbQuery(sql<User[]>`SELECT * FROM app_user WHERE id = ${id}`);
+}
+
 export function deleteUserById(id: string) {
   return runDbQuery(sql<User[]>`DELETE FROM app_user WHERE id = ${id}`);
+}
+
+export function updatePasswordById(id: string, newPassword: string) {
+  return runDbQuery(sql<User[]>`UPDATE app_user SET password = ${newPassword} WHERE id = ${id}`);
 }
