@@ -190,12 +190,12 @@ userRoutes.post(`/reset-password`, async (context) => {
   context.response.body = "";
 });
 
-userRoutes.delete(`logout`, async (context) => {
-  if (await context.cookies.get(ACCESS_TOKEN_CONST)) {
-    context.cookies.delete(ACCESS_TOKEN_CONST);
-  } else {
-    errorLogger.error({ message: `Kunde inte hitta ${ACCESS_TOKEN_CONST}` });
-  }
+userRoutes.post(`logout`, async (context) => {
+  // if (await context.cookies.get(ACCESS_TOKEN_CONST)) {
+  //   context.cookies.delete(ACCESS_TOKEN_CONST);
+  // } else {
+  errorLogger.error({ message: `Kunde inte hitta ${ACCESS_TOKEN_CONST}` });
+  // }
 
   context.response.body = "";
 });
