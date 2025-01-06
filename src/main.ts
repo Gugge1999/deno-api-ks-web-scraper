@@ -8,6 +8,11 @@ import { currentTime } from "./services/time-and-date.ts";
 import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
 import userRoutes from "./routes/user.ts";
+import { ServiceAccount } from "npm:firebase-admin@13.0.2";
+import admin from "firebase-admin";
+import serviceAccount from "../serviceAccountKey.json" with { type: "json" };
+import { firebaseConfig } from "./constants/config.ts";
+import { initializeApp } from "npm:@firebase/app@0.10.17";
 
 console.log(`Init api @%c ${currentTime()}`, "color: green");
 
@@ -25,6 +30,12 @@ app.use(scraperRoutes.allowedMethods());
 
 app.use(userRoutes.routes());
 app.use(userRoutes.allowedMethods());
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount as ServiceAccount),
+});
+
+export const fbApp = initializeApp(firebaseConfig);
 
 const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 

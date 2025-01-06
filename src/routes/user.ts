@@ -4,14 +4,18 @@ import { JWTPayload, jwtVerify, SignJWT } from "jose";
 import { validate } from "jsr:@std/uuid";
 import { Buffer } from "node:buffer";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, validatePassword } from "npm:@firebase/auth@1.8.1";
 
 import { deleteUserById, getUserByEmail, getUserById, getUserByUsername, insertNewUser } from "../database/user.ts";
 import { errorLogger } from "../services/logger.ts";
 import { validateBody } from "./bevakningar.ts";
+import { fbApp } from "../main.ts";
+import { FirebaseError } from "npm:@firebase/app@0.10.17";
 
 // TODO: Den här borde sättas i .env
 const secret = new TextEncoder().encode("secret-that-no-one-knows");
 const keyLength = 32;
+const ACCESS_TOKEN_CONST = "access_token";
 
 const userRoutes = new Router({
   prefix: "/api/user",
@@ -20,58 +24,70 @@ const userRoutes = new Router({
 userRoutes.post(`/register`, async (context) => {
   const { username, email, password } = await validateBodyUser(context);
 
-  if (password.length < 5) {
-    throw new httpErrors.BadRequest("Lösenordet måste vara minst 5 tecken långt");
-  }
+  // if (password.length < 6) {
+  //   throw new httpErrors.BadRequest("Lösenordet måste vara minst 5 tecken långt");
+  // }
+  //
+  // const hashedPassword = hashPassword(password);
+  // const newUser = await insertNewUser(username, email, hashedPassword);
+  //
+  // if (
+  //   newUser?.error && typeof newUser.error === "object" && "constraint_name" in newUser.error &&
+  //   newUser.error.constraint_name
+  // ) {
+  //   if (newUser.error.constraint_name === "unique_email") {
+  //     throw new httpErrors.BadRequest(`Användare med email: ${email} finns redan`);
+  //   }
+  //
+  //   if (newUser.error.constraint_name === "unique_username") {
+  //     throw new httpErrors.BadRequest(`Användare med användarnamn: ${username} finns redan`);
+  //   }
+  // }
 
-  const hashedPassword = hashPassword(password);
-  const newUser = await insertNewUser(username, email, hashedPassword);
+  // TODO: Ska den vara i config så att den inte anropas varje gång i en endpoint?
+  const auth = getAuth(fbApp);
 
-  if (
-    newUser?.error && typeof newUser.error === "object" && "constraint_name" in newUser.error &&
-    newUser.error.constraint_name
-  ) {
-    if (newUser.error.constraint_name === "unique_email") {
-      throw new httpErrors.BadRequest(`Användare med email: ${email} finns redan`);
+  // Mer info finns här: https://firebase.google.com/docs/auth/web/password-auth#policy
+  const status = await validatePassword(auth, password);
+  if (!status.isValid) {
+    if (!status.meetsMinPasswordLength) {
+      throw new httpErrors.UnprocessableEntity(
+        `Lösenordet måste vara minst: ${status.passwordPolicy.customStrengthOptions.minPasswordLength} tecken`,
+      );
     }
 
-    if (newUser.error.constraint_name === "unique_username") {
-      throw new httpErrors.BadRequest(`Användare med användarnamn: ${username} finns redan`);
+    if (!status.meetsMaxPasswordLength) {
+      throw new httpErrors.UnprocessableEntity(
+        `Lösenordet får max vara: ${status.passwordPolicy.customStrengthOptions.maxPasswordLength} tecken`,
+      );
     }
   }
 
-  if (newUser.error || newUser.result?.length === 0) {
-    throw new httpErrors.InternalServerError(`Kunde inte skapa användare dbError: ${newUser.error}`);
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    handleFireBaseError(e, email);
   }
 
-  // TODO: Ska det vara en random guid eller id från app_user?
-  const token = await createJwt({ userId: 123, username: username });
-
-  context.cookies.set("jwt", token, { httpOnly: true });
-
-  const res = {
-    ...newUser.result?.[0],
-    jwtToken: token,
-  };
+  const res = "";
 
   context.response.body = res;
 });
 
-// TODO: Vid inloggning bör inte jwt finnas. När man loggar in borde den sättas
 userRoutes.post(`/login`, async (context) => {
-  const { username, password } = await validateBodyUser(context);
+  const { username, password, email } = await validateBodyUser(context);
 
-  const jwtToken = await context.cookies.get("jwt");
-
-  if (jwtToken === undefined) {
-    throw new httpErrors.Unauthorized("Ingen jwt token hittades");
-  }
-
-  const jwtVerified = await verifyJwt(jwtToken);
-
-  if (jwtVerified === null) {
-    throw new httpErrors.Unauthorized("Ogiltig jwt token");
-  }
+  // const jwtToken = await context.cookies.get("jwt");
+  //
+  // if (jwtToken === undefined) {
+  //   throw new httpErrors.Unauthorized("Ingen jwt token hittades");
+  // }
+  //
+  // const jwtVerified = await verifyJwt(jwtToken);
+  //
+  // if (jwtVerified === null) {
+  //   throw new httpErrors.Unauthorized("Ogiltig jwt token");
+  // }
 
   const user = await getUserByUsername(username);
 
@@ -83,11 +99,24 @@ userRoutes.post(`/login`, async (context) => {
     throw new httpErrors.BadRequest("Email finns inte registered");
   }
 
-  const passwordMatches = comparePasswords(password, user.result?.[0].password ?? "");
+  try {
+    const auth = getAuth(fbApp);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const idToken = await userCredential.user.getIdToken();
 
-  if (!passwordMatches) {
-    throw new httpErrors.BadRequest("Ogiltigt användarnamn eller lösenord");
+    if (idToken) {
+      context.cookies.set(ACCESS_TOKEN_CONST, idToken, { httpOnly: true });
+    } else {
+      errorLogger.error({ message: "Något gick fen vid inloggning. UserCredential: " + userCredential });
+    }
+  } catch (e) {
+    handleFireBaseError(e);
   }
+
+  // const passwordMatches = comparePasswords(password, user.result?.[0].password ?? "");
+  // if (!passwordMatches) {
+  //   throw new httpErrors.BadRequest("Ogiltigt användarnamn eller lösenord");
+  // }
 
   context.response.body = "";
 });
@@ -161,6 +190,16 @@ userRoutes.post(`/reset-password`, async (context) => {
   context.response.body = "";
 });
 
+userRoutes.delete(`logout`, async (context) => {
+  if (await context.cookies.get(ACCESS_TOKEN_CONST)) {
+    context.cookies.delete(ACCESS_TOKEN_CONST);
+  } else {
+    errorLogger.error({ message: `Kunde inte hitta ${ACCESS_TOKEN_CONST}` });
+  }
+
+  context.response.body = "";
+});
+
 // TODO: Skapa endpoint för att logga ut, glömt lösenord, uppdatera lösenord
 function hashPassword(password: string): string {
   try {
@@ -186,6 +225,20 @@ function comparePasswords(password: string, hash: string): boolean {
     errorLogger.error({ message: `Något gick fel vid jämförande av lösenord: Error: ${e}` });
 
     return false;
+  }
+}
+
+function handleFireBaseError(e: unknown, value?: unknown) {
+  if (e instanceof FirebaseError) {
+    switch (e.code) {
+      case "auth/email-already-in-use":
+        throw new httpErrors.BadRequest(`Email ${value} används redan. dbError: ${e}`);
+
+      default:
+        throw new httpErrors.InternalServerError(`Kunde inte skapa användare dbError: ${e}`);
+    }
+  } else {
+    throw new httpErrors.InternalServerError(`Något gick fel i Firebase. dbError: ${e}`);
   }
 }
 
