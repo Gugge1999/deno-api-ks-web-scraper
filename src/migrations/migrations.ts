@@ -1,5 +1,4 @@
 import shift from "postgres-shift";
-// import "jsr:@std/dotenv/load";
 import { fromFileUrl } from "@std/path/from-file-url";
 import { currentDateAndTime } from "../services/time-and-date.ts";
 import { sql } from "../database/query.ts";

@@ -18,7 +18,10 @@ console.log(`Init api @%c ${currentTime()}`, "color: green");
 
 const app = new Application();
 
-app.use(oakCors());
+app.use(oakCors({
+  credentials: true,
+  origin: true,
+}));
 
 app.use(errorMiddleware);
 
@@ -31,12 +34,13 @@ app.use(scraperRoutes.allowedMethods());
 app.use(userRoutes.routes());
 app.use(userRoutes.allowedMethods());
 
+export const fbApp = initializeApp(firebaseConfig);
+
+// OBS: Lägg märke till import av @std/dotenv/load
+const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as ServiceAccount),
 });
-
-export const fbApp = initializeApp(firebaseConfig);
-
-const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 
 await Promise.all([app.listen({ port: denoPort }), compareStoredWithScraped()]);

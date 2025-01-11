@@ -1,6 +1,5 @@
-import { errorLogger } from "../services/logger.ts";
-import "jsr:@std/dotenv/load";
 import postgres from "postgres";
+import { errorLogger } from "../services/logger.ts";
 
 interface DbResponse<T> {
   result: Awaited<T> | null;

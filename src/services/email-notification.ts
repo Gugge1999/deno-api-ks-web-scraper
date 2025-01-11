@@ -1,6 +1,5 @@
 // @deno-types="npm:@types/nodemailer"^6.4.16"
 import { createTransport } from "nodemailer";
-import "jsr:@std/dotenv/load";
 
 const emailConfig = {
   user: Deno.env.get("EMAIL"),

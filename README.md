@@ -13,7 +13,7 @@
 ## Dokumentation
  
 ### Guide: använda postgres i fly.io via Windows Terminal
-username och pass finns i mapp på desktop (Om du behöver logga in igen)
+Username och pass finns i mapp på desktop (Om du behöver logga in igen)
  
 1. Ansluta: `fly postgres connect -a api-ks-web-scraper-db`
 1. Anslut till databas: `\c api-ks-web-scraper`

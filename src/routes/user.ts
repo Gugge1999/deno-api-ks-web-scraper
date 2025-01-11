@@ -6,7 +6,7 @@ import { Buffer } from "node:buffer";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, validatePassword } from "npm:@firebase/auth@1.8.1";
 
-import { deleteUserById, getUserByEmail, getUserById, getUserByUsername, insertNewUser } from "../database/user.ts";
+import { deleteUserById, getUserByEmail, getUserById } from "../database/user.ts";
 import { errorLogger } from "../services/logger.ts";
 import { validateBody } from "./bevakningar.ts";
 import { fbApp } from "../main.ts";
@@ -22,7 +22,7 @@ const userRoutes = new Router({
 });
 
 userRoutes.post(`/register`, async (context) => {
-  const { username, email, password } = await validateBodyUser(context);
+  const { email, password } = await validateBodyUser(context);
 
   // if (password.length < 6) {
   //   throw new httpErrors.BadRequest("Lösenordet måste vara minst 5 tecken långt");
@@ -64,18 +64,24 @@ userRoutes.post(`/register`, async (context) => {
   }
 
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // TODO: Den här biten är samma som vid login. Ska det vara en funktion?
+    const idToken = await userCredential.user.getIdToken();
+
+    if (idToken) {
+      context.cookies.set(ACCESS_TOKEN_CONST, idToken, { httpOnly: true });
+    } else {
+      errorLogger.error({ message: `Något gick fen vid inloggning. UserCredential: ${userCredential}` });
+    }
   } catch (e) {
     handleFireBaseError(e, email);
   }
 
-  const res = "";
-
-  context.response.body = res;
+  context.response.body = "";
 });
 
 userRoutes.post(`/login`, async (context) => {
-  const { username, password, email } = await validateBodyUser(context);
+  const { password, email } = await validateBodyUser(context);
 
   // const jwtToken = await context.cookies.get("jwt");
   //
@@ -89,15 +95,15 @@ userRoutes.post(`/login`, async (context) => {
   //   throw new httpErrors.Unauthorized("Ogiltig jwt token");
   // }
 
-  const user = await getUserByUsername(username);
+  // const user = await getUserByUsername(username);
 
-  if (user.error) {
-    throw new httpErrors.Unauthorized("Kunde inte hämta användare");
-  }
-
-  if (user.result?.length === 0) {
-    throw new httpErrors.BadRequest("Email finns inte registered");
-  }
+  // if (user.error) {
+  //   throw new httpErrors.Unauthorized("Kunde inte hämta användare");
+  // }
+  //
+  // if (user.result?.length === 0) {
+  //   throw new httpErrors.BadRequest("Email finns inte registered");
+  // }
 
   try {
     const auth = getAuth(fbApp);
@@ -105,6 +111,7 @@ userRoutes.post(`/login`, async (context) => {
     const idToken = await userCredential.user.getIdToken();
 
     if (idToken) {
+      // context.cookies.set(ACCESS_TOKEN_CONST, idToken, { httpOnly: true });
       context.cookies.set(ACCESS_TOKEN_CONST, idToken, { httpOnly: true });
     } else {
       errorLogger.error({ message: "Något gick fen vid inloggning. UserCredential: " + userCredential });
@@ -234,6 +241,12 @@ function handleFireBaseError(e: unknown, value?: unknown) {
       case "auth/email-already-in-use":
         throw new httpErrors.BadRequest(`Email ${value} används redan. dbError: ${e}`);
 
+      case "auth/user-not-found":
+        throw new httpErrors.BadRequest(`Kunde inte hitta användare med email: ${value}. dbError: ${e}`);
+
+      case "auth/invalid-credential":
+        throw new httpErrors.BadRequest(`Fel lösenord`);
+
       default:
         throw new httpErrors.InternalServerError(`Kunde inte skapa användare dbError: ${e}`);
     }
@@ -264,20 +277,19 @@ async function verifyJwt(token: string | undefined): Promise<JWTPayload | null> 
 }
 
 // TODO: Typa bättre, kanske unknown?
-async function validateBodyUser(context: any): Promise<{ username: string; email: string; password: string }> {
+async function validateBodyUser(context: any) {
   await validateBody(context);
 
-  const { username, email, password }: {
-    username?: string;
+  const { email, password }: {
     email?: string;
     password?: string;
   } = await context.request.body.json();
 
-  if (username === undefined || email === undefined || password === undefined) {
+  if (email === undefined || password === undefined) {
     throw new httpErrors.UnprocessableEntity("username, email och password behöver finnas i body");
   }
 
-  return { username, email, password };
+  return { email, password };
 }
 
 export default userRoutes;
