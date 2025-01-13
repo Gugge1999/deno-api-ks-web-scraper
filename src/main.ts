@@ -36,7 +36,7 @@ app.use(userRoutes.allowedMethods());
 
 export const fbApp = initializeApp(firebaseConfig);
 
-// OBS: Lägg märke till import av @std/dotenv/load
+// OBS: Lägg märke till import av @std/dotenv/load. Utan den fungerar inte .env
 const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 
 admin.initializeApp({

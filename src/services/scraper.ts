@@ -45,7 +45,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   // Titel
   $(CONTENT_ROW_TITLE_CLASS)
     .get()
-    .map((element: any) => {
+    .map((element: unknown) => {
       // TODO: Det här gåt nog att göra enklare och bara plocka ut texten för namnet på annonsen. Inte badge för status också
       return titles.push(
         $(element)
@@ -62,18 +62,20 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   // Datum
   $(".u-dt")
     .get()
-    .map((element: any) => {
-      const date = $(element).attr("datetime");
-      if (date) {
-        dates.push(date);
+    .map((element: unknown) => {
+      const date = Number.parseInt($(element).attr("data-time") ?? "");
+
+      const isoDate = new Date(date * 1000).toISOString();
+
+      if (isoDate) {
+        dates.push(isoDate);
       }
     });
 
   // Länk
-  // TODO: Ska element vara av typen Element?
   $(CONTENT_ROW_TITLE_CLASS)
     .get()
-    .map((element: any) => links.push(`https://klocksnack.se${$(element).find("a").attr("href")}`));
+    .map((element: unknown) => links.push(`https://klocksnack.se${$(element).find("a").attr("href")}`));
 
   const scrapedWatches: ScrapedWatch[] = [];
 

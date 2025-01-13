@@ -6,8 +6,6 @@
 
 * Använd connection string som i api-go-web-scraper
 
-* [för login och registering](https://github.com/thecodeholic/deno-login-register/blob/master/routes.ts)
-
 
 ---
 ## Dokumentation
@@ -24,7 +22,7 @@ Username och pass finns i mapp på desktop (Om du behöver logga in igen)
 ### Guide: Load testing
 `autocannon -c=10000 192.168.1.2:3000/api/bevakningar/all-watches`
 
-Kör med config som har 10 000 connections. För att öka tiden som lasten körs använd t.e.x. `-d=30` för att köra i 30 sekunder
+Kör med config som har 10 000 connections. För att öka tiden som lasten körs använd t.e.x. `-d=30` för att köra i 30 sekunder. Default är 10 sek.
 
 ---
 * [deno blog](https://deno.com/blog)

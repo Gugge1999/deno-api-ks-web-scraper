@@ -198,11 +198,11 @@ userRoutes.post(`/reset-password`, async (context) => {
 });
 
 userRoutes.post(`logout`, async (context) => {
-  // if (await context.cookies.get(ACCESS_TOKEN_CONST)) {
-  //   context.cookies.delete(ACCESS_TOKEN_CONST);
-  // } else {
-  errorLogger.error({ message: `Kunde inte hitta ${ACCESS_TOKEN_CONST}` });
-  // }
+  if (await context.cookies.get(ACCESS_TOKEN_CONST)) {
+    context.cookies.delete(ACCESS_TOKEN_CONST);
+  } else {
+    errorLogger.error({ message: `Kunde inte hitta ${ACCESS_TOKEN_CONST}` });
+  }
 
   context.response.body = "";
 });
@@ -247,12 +247,15 @@ function handleFireBaseError(e: unknown, value?: unknown) {
       case "auth/invalid-credential":
         throw new httpErrors.BadRequest(`Fel lösenord`);
 
+      case "auth/invalid-email":
+        throw new httpErrors.BadRequest(`Ogiltig lösenord`);
+
       default:
-        throw new httpErrors.InternalServerError(`Kunde inte skapa användare dbError: ${e}`);
+        throw new httpErrors.InternalServerError(`Något gick fel i Firebase. dbError: ${e}`);
     }
-  } else {
-    throw new httpErrors.InternalServerError(`Något gick fel i Firebase. dbError: ${e}`);
   }
+
+  throw new httpErrors.InternalServerError(`Något gick fel i Firebase. dbError: ${e}`);
 }
 
 async function createJwt(payload: JWTPayload): Promise<string> {
