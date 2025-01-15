@@ -63,7 +63,7 @@ scraperRoutes
       throw new httpErrors.InternalServerError(`Kunde inte ändra aktiv status dbError: ${watchResult.error}`);
     }
 
-    const response = { id, label, active: newActiveStatus };
+    const response = { active: newActiveStatus, ...watchResult };
 
     context.response.body = response;
   })
