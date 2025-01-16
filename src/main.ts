@@ -18,10 +18,12 @@ console.log(`Init api @%c ${currentTime()}`, "color: green");
 
 const app = new Application();
 
-app.use(oakCors({
-  credentials: true,
-  origin: true,
-}));
+// app.use(oakCors({
+//   credentials: true,
+//   origin: true,
+// }));
+
+app.use(oakCors());
 
 app.use(errorMiddleware);
 
@@ -40,6 +42,8 @@ export const fbApp = initializeApp(firebaseConfig);
 const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 
 const cert: ServiceAccount = JSON.parse(Deno.env.get("FBSERVICEACCOUNTKEY") ?? "");
+
+console.log("asdf ", cert);
 
 admin.initializeApp({
   credential: admin.credential.cert(cert),
