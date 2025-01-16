@@ -45,11 +45,7 @@ scraperRoutes
   .put(`/toggle-active-status`, async (context) => {
     await validateBody(context);
 
-    const { id, active, label }: {
-      id?: string;
-      label?: string;
-      active?: boolean;
-    } = await context.request.body.json();
+    const { id, active, label }: { id?: string; label?: string; active?: boolean } = await context.request.body.json();
 
     if (id === undefined || active === undefined || label === undefined) {
       throw new httpErrors.UnprocessableEntity("id, active och label behöver finnas i body");
@@ -114,10 +110,7 @@ scraperRoutes
   .patch(`/toggle-all`, async (context) => {
     await validateBody(context);
 
-    const { ids, activateAll }: {
-      ids?: string[];
-      activateAll?: boolean;
-    } = await context.request.body.json();
+    const { ids, activateAll }: { ids?: string[]; activateAll?: boolean } = await context.request.body.json();
 
     if (ids === undefined || activateAll === undefined) {
       throw new httpErrors.UnprocessableEntity("ids och isToggleActive behöver finnas i body");

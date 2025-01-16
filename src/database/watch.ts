@@ -1,5 +1,4 @@
 import { WatchDbRes } from "../models/watch-db-res.ts";
-import { httpErrors } from "@oak/oak";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { runDbQuery, sql } from "./query.ts";
 import { errorLogger } from "../services/logger.ts";
