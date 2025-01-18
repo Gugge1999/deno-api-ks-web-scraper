@@ -26,6 +26,7 @@
     "npm:@types/cheerio@~0.22.35": "0.22.35",
     "npm:@types/nodemailer@*": "6.4.17",
     "npm:cheerio@1.0.0": "1.0.0",
+    "npm:firebase-admin@13.0.2": "13.0.2",
     "npm:firebase-admin@^13.0.2": "13.0.2",
     "npm:jose@^5.9.6": "5.9.6",
     "npm:nodemailer@^6.9.15": "6.9.16",
