@@ -40,8 +40,6 @@ const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 
 const cert = JSON.parse(Deno.env.get("FBSERVICEACCOUNTKEY") ?? "");
 
-console.log("asdf. Typeof: " + typeof cert, cert);
-
 admin.initializeApp({ credential: admin.credential.cert(cert) });
 
 await Promise.all([app.listen({ port: denoPort }), compareStoredWithScraped()]);
