@@ -11,8 +11,8 @@ import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
 import userRoutes from "./routes/user.ts";
 import admin from "firebase-admin";
-// import serviceAccount from "../serviceAccountKey.json" with { type: "json" };
 import { firebaseConfig } from "./constants/config.ts";
+import { errorLogger, infoLogger } from "./services/logger.ts";
 
 console.log(`Init api @%c ${currentTime()}`, "color: green");
 
@@ -41,12 +41,15 @@ export const fbApp = initializeApp(firebaseConfig);
 // OBS: Lägg märke till import av @std/dotenv/load. Utan den fungerar inte .env
 const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 
-const cert: ServiceAccount = JSON.parse(Deno.env.get("FBSERVICEACCOUNTKEY") ?? "");
+let cert: ServiceAccount | string = "";
+try {
+  cert = JSON.parse(Deno.env.get("FBSERVICEACCOUNTKEY") ?? "");
+} catch (e) {
+  errorLogger.error({ message: `Något gick fel vid skapande av service account key. Error: ${e}` });
+}
 
-console.log("asdf ", cert);
+console.log("asdf. Typeof: " + typeof cert, cert);
 
-admin.initializeApp({
-  credential: admin.credential.cert(cert),
-});
+admin.initializeApp({ credential: admin.credential.cert(cert) });
 
 await Promise.all([app.listen({ port: denoPort }), compareStoredWithScraped()]);
