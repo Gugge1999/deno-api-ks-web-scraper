@@ -4,8 +4,6 @@
 
 * Radera databasen ks-web-scraper och använd istället default postgres.
 
-* Använd connection string som i api-go-web-scraper
-
 
 ---
 ## Dokumentation

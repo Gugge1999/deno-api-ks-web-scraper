@@ -9,7 +9,7 @@ import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, va
 import { deleteUserById, getUserByEmail, getUserById } from "../database/user.ts";
 import { errorLogger } from "../services/logger.ts";
 import { validateBody } from "./bevakningar.ts";
-// import { fbApp } from "../main.ts";
+import { fbApp } from "../main.ts";
 import { FirebaseError } from "npm:@firebase/app@0.10.17";
 
 // TODO: Den här borde sättas i .env
@@ -45,37 +45,37 @@ userRoutes.post(`/register`, async (context) => {
   // }
 
   // TODO: Ska den vara i config så att den inte anropas varje gång i en endpoint?
-  // const auth = getAuth(fbApp);
+  const auth = getAuth(fbApp);
 
   // Mer info finns här: https://firebase.google.com/docs/auth/web/password-auth#policy
-  // const status = await validatePassword(auth, password);
-  // if (!status.isValid) {
-  //   if (!status.meetsMinPasswordLength) {
-  //     throw new httpErrors.UnprocessableEntity(
-  //       `Lösenordet måste vara minst: ${status.passwordPolicy.customStrengthOptions.minPasswordLength} tecken`,
-  //     );
-  //   }
-  //
-  //   if (!status.meetsMaxPasswordLength) {
-  //     throw new httpErrors.UnprocessableEntity(
-  //       `Lösenordet får max vara: ${status.passwordPolicy.customStrengthOptions.maxPasswordLength} tecken`,
-  //     );
-  //   }
-  // }
+  const status = await validatePassword(auth, password);
+  if (!status.isValid) {
+    if (!status.meetsMinPasswordLength) {
+      throw new httpErrors.UnprocessableEntity(
+        `Lösenordet måste vara minst: ${status.passwordPolicy.customStrengthOptions.minPasswordLength} tecken`,
+      );
+    }
 
-  // try {
-  //   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  //   // TODO: Den här biten är samma som vid login. Ska det vara en funktion?
-  //   const idToken = await userCredential.user.getIdToken();
-  //
-  //   if (idToken) {
-  //     context.cookies.set(ACCESS_TOKEN_CONST, idToken, { httpOnly: true });
-  //   } else {
-  //     errorLogger.error({ message: `Något gick fen vid inloggning. UserCredential: ${userCredential}` });
-  //   }
-  // } catch (e) {
-  //   handleFireBaseError(e, email);
-  // }
+    if (!status.meetsMaxPasswordLength) {
+      throw new httpErrors.UnprocessableEntity(
+        `Lösenordet får max vara: ${status.passwordPolicy.customStrengthOptions.maxPasswordLength} tecken`,
+      );
+    }
+  }
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // TODO: Den här biten är samma som vid login. Ska det vara en funktion?
+    const idToken = await userCredential.user.getIdToken();
+
+    if (idToken) {
+      context.cookies.set(ACCESS_TOKEN_CONST, idToken, { httpOnly: true });
+    } else {
+      errorLogger.error({ message: `Något gick fen vid inloggning. UserCredential: ${userCredential}` });
+    }
+  } catch (e) {
+    handleFireBaseError(e, email);
+  }
 
   context.response.body = "";
 });
@@ -105,20 +105,20 @@ userRoutes.post(`/login`, async (context) => {
   //   throw new httpErrors.BadRequest("Email finns inte registered");
   // }
 
-  // try {
-  //   const auth = getAuth(fbApp);
-  //   const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  //   const idToken = await userCredential.user.getIdToken();
-  //
-  //   if (idToken) {
-  //     // context.cookies.set(ACCESS_TOKEN_CONST, idToken, { httpOnly: true });
-  //     context.cookies.set(ACCESS_TOKEN_CONST, idToken, { httpOnly: true });
-  //   } else {
-  //     errorLogger.error({ message: "Något gick fen vid inloggning. UserCredential: " + userCredential });
-  //   }
-  // } catch (e) {
-  //   handleFireBaseError(e);
-  // }
+  try {
+    const auth = getAuth(fbApp);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const idToken = await userCredential.user.getIdToken();
+
+    if (idToken) {
+      // context.cookies.set(ACCESS_TOKEN_CONST, idToken, { httpOnly: true });
+      context.cookies.set(ACCESS_TOKEN_CONST, idToken, { httpOnly: true });
+    } else {
+      errorLogger.error({ message: "Något gick fen vid inloggning. UserCredential: " + userCredential });
+    }
+  } catch (e) {
+    handleFireBaseError(e);
+  }
 
   // const passwordMatches = comparePasswords(password, user.result?.[0].password ?? "");
   // if (!passwordMatches) {

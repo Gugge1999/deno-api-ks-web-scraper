@@ -1,12 +1,17 @@
+import { ServiceAccount } from "npm:firebase-admin@13.0.2";
+import { initializeApp } from "npm:@firebase/app@0.10.17";
 import { oakCors } from "@tajpouria/cors";
 import { Application } from "@oak/oak";
+import admin from "firebase-admin";
 import "jsr:@std/dotenv/load";
-
 import { compareStoredWithScraped } from "./services/scraper.ts";
 import errorMiddleware from "./middleware/error-middleware.ts";
 import { currentTime } from "./services/time-and-date.ts";
+import { firebaseConfig } from "./constants/config.ts";
 import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
+import { errorLogger } from "./services/logger.ts";
+import userRoutes from "./routes/user.ts";
 
 console.log(`Init api @%c ${currentTime()}`, "color: green");
 
@@ -27,23 +32,23 @@ app.use(apiStatusRoutes.allowedMethods());
 app.use(scraperRoutes.routes());
 app.use(scraperRoutes.allowedMethods());
 
-// app.use(userRoutes.routes());
-// app.use(userRoutes.allowedMethods());
+app.use(userRoutes.routes());
+app.use(userRoutes.allowedMethods());
 
-// export const fbApp = initializeApp(firebaseConfig);
+export const fbApp = initializeApp(firebaseConfig);
 
 // OBS: Lägg märke till import av @std/dotenv/load. Utan den fungerar inte .env
 const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 
-// let cert: ServiceAccount | string = "";
-// try {
-//   cert = JSON.parse(Deno.env.get("FBSERVICEACCOUNTKEY") ?? "");
-// } catch (e) {
-//   errorLogger.error({ message: `Något gick fel vid skapande av service account key. Error: ${e}` });
-// }
-//
-// console.log("asdf. Typeof: " + typeof cert, cert);
-//
-// admin.initializeApp({ credential: admin.credential.cert(cert) });
+let cert: ServiceAccount | string = "";
+try {
+  cert = JSON.parse(Deno.env.get("FBSERVICEACCOUNTKEY") ?? "");
+} catch (e) {
+  errorLogger.error({ message: `Något gick fel vid skapande av service account key. Error: ${e}` });
+}
+
+console.log("asdf. Typeof: " + typeof cert, cert);
+
+admin.initializeApp({ credential: admin.credential.cert(cert) });
 
 await Promise.all([app.listen({ port: denoPort }), compareStoredWithScraped()]);

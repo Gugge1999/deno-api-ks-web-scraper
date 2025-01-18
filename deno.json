@@ -21,7 +21,9 @@
   },
   "nodeModulesDir": "auto",
   "fmt": {
-    "lineWidth": 135
-  }
+    "lineWidth": 135,
+    "include": ["src/"]
+  },
+  "exclude": ["node_modules/", "logs/", ".VSCodeCounter/"]
 }
 
