@@ -107,7 +107,7 @@ scraperRoutes
 
     context.response.body = returnDto;
   })
-  .patch(`/toggle-all`, async (context) => {
+  .patch("/toggle-all", async (context) => {
     await validateBody(context);
 
     const { ids, activateAll }: { ids?: string[]; activateAll?: boolean } = await context.request.body.json();
