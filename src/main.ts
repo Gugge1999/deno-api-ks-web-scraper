@@ -1,15 +1,12 @@
 import { oakCors } from "@tajpouria/cors";
 import { Application } from "@oak/oak";
 import "jsr:@std/dotenv/load";
-import { initializeApp } from "npm:@firebase/app@0.10.17";
 
 import { compareStoredWithScraped } from "./services/scraper.ts";
 import errorMiddleware from "./middleware/error-middleware.ts";
 import { currentTime } from "./services/time-and-date.ts";
 import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
-import userRoutes from "./routes/user.ts";
-import { firebaseConfig } from "./constants/config.ts";
 
 console.log(`Init api @%c ${currentTime()}`, "color: green");
 
@@ -30,8 +27,8 @@ app.use(apiStatusRoutes.allowedMethods());
 app.use(scraperRoutes.routes());
 app.use(scraperRoutes.allowedMethods());
 
-app.use(userRoutes.routes());
-app.use(userRoutes.allowedMethods());
+// app.use(userRoutes.routes());
+// app.use(userRoutes.allowedMethods());
 
 // export const fbApp = initializeApp(firebaseConfig);
 
