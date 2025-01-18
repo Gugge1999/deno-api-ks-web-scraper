@@ -18,6 +18,6 @@ RUN deno install --allow-scripts=npm:protobufjs@7.4.0
 # These steps will be re-run upon each file change in your working directory:
 COPY . .
 # Compile the main app so that it doesn't need to be compiled each startup/entry.
-RUN deno cache src/main.ts
+#RUN deno cache src/main.ts
 
 CMD ["task", "start"]
