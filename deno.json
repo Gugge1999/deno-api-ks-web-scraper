@@ -19,6 +19,7 @@
     "postgres-shift": "npm:postgres-shift@^0.1.0",
     "winston": "npm:winston@^3.17.0"
   },
+  "nodeModulesDir": "auto",
   "fmt": {
     "lineWidth": 135
   }
