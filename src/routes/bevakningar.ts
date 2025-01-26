@@ -107,7 +107,7 @@ scraperRoutes
       lastEmailSent: null,
       notifications: [],
       watchToScrape: dbRes.watch_to_scrape,
-      watch: {
+      latestWatch: {
         postedDate: watches[0].postedDate,
         link: watches[0].link,
         name: watches[0].name,
@@ -151,7 +151,7 @@ function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification
       lastEmailSent: scrapedWatch.last_email_sent,
       watchToScrape: scrapedWatch.watch_to_scrape,
       notifications: notificationsForWatch,
-      watch: {
+      latestWatch: {
         postedDate: watches[0].postedDate,
         link: watches[0].link,
         name: watches[0].name,
