@@ -5,9 +5,9 @@ const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
   try {
     await next();
   } catch (err: unknown) {
-    const stack = err && typeof err === "object" && "stack" in err ? err.stack : "";
-    const message = getErrMessage(err);
+    const stack = getStack(err);
     const status = getErrorStatus(err);
+    const message = getErrMessage(err);
 
     errorLogger.error({
       message: message,
@@ -18,12 +18,20 @@ const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
 
     ctx.response.status = status;
     ctx.response.body = {
-      status,
-      message,
       stack,
+      status, // TODO: Behöver den skickas med i body? Den finns ju redan status
+      message,
     };
   }
 };
+
+function getStack(err: unknown): unknown {
+  if (err && typeof err === "object" && "stack" in err) {
+    return err.stack;
+  }
+
+  return "";
+}
 
 function getErrorStatus(err: unknown): number {
   if (err && typeof err === "object" && "status" in err && typeof err.status === "number") {
