@@ -71,6 +71,15 @@ scraperRoutes
     if (label === undefined || watchToScrape === undefined) {
       throw new httpErrors.UnprocessableEntity("label och watchToScrape behöver finnas i body");
     }
+
+    if (label.length < 3 || label.length > 35) {
+      throw new httpErrors.UnprocessableEntity("label måste vara mellan 3 och 35 tecken");
+    }
+
+    if (watchToScrape.length < 2 || watchToScrape.length > 35) {
+      throw new httpErrors.UnprocessableEntity("watchToScrape måste vara mellan 2 och 35 tecken");
+    }
+
     const watchToScrapeLink =
       `https://klocksnack.se/search/1/?q=${watchToScrape}&t=post&c[child_nodes]=1&c[nodes][0]=11&c[title_only]=1&o=date` as const;
 

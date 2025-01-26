@@ -17,20 +17,29 @@ Username och pass finns i mapp på desktop (Om du behöver logga in igen)
 1. Lista alla tabeller: `\dt`
 1. Visa datatyper, pk och fk på en tabell: `\d watch`
 
+
+---
 ### Guide: Load testing
 `autocannon -c=10000 192.168.1.2:3000/api/bevakningar/all-watches`
 
 Kör med config som har 10 000 connections. För att öka tiden som lasten körs använd t.e.x. `-d=30` för att köra i 30 sekunder. Default är 10 sek.
 
----
-* [deno blog](https://deno.com/blog)
 
-* [Load testing](https://www.npmjs.com/package/autocannon)
 
-* [Docs för porsager/postgres](https://github.com/porsager/postgres)
 
-* [Bra repo - api starter oak](https://github.com/asad-mlbd/deno-api-starter-oak)
+<div align="center">
 
-* [JWT](https://github.com/wpcodevo/deno-refresh-jwt/blob/master/src/controllers/auth.controller.ts)
+### Länkar
+> [deno blog](https://deno.com/blog)
+> 
+> [Load testing](https://www.npmjs.com/package/autocannon)
+> 
+> [Docs för porsager/postgres](https://github.com/porsager/postgres)
+> 
+> [Bra repo - api starter oak](https://github.com/asad-mlbd/deno-api-starter-oak)
+> 
+> [JWT](https://github.com/wpcodevo/deno-refresh-jwt/blob/master/src/controllers/auth.controller.ts)
+> 
+> [CRUD + JWT](https://github.com/22mahmoud/deno_crud_jwt)
 
-* [CRUD + JWT](https://github.com/22mahmoud/deno_crud_jwt)
+</div>
