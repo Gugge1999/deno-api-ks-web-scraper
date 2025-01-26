@@ -131,9 +131,7 @@ scraperRoutes
       throw new httpErrors.InternalServerError(`Kunde inte ändra aktiv status på alla bevakningar: ${toggleAllResult.error}`);
     }
 
-    const response = {};
-
-    context.response.body = response;
+    context.response.body = {};
   });
 
 function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification[]): WatchAndNotificationDto[] {
