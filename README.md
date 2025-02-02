@@ -4,6 +4,7 @@
 
 * Radera databasen ks-web-scraper och använd istället default postgres.
 
+* [Lägg till auto start / stop på fly.io](https://fly.io/docs/launch/autostop-autostart/)
 
 ---
 ## Dokumentation

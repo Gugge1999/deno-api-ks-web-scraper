@@ -15,11 +15,9 @@ primary_region = "arn"
   http_checks = []
   processes = ["app"]
   protocol = "tcp"
-  script_checks = []
-  [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
-    type = "connections"
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
 
   [[services.ports]]
     force_https = true
