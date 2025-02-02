@@ -10,7 +10,7 @@ export const getAllActiveWatches = () => runDbQuery(sql<WatchDbRes[]>`SELECT * F
 
 export const deleteWatchById = (id: string) => runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
 
-// TODO: Gör om den här till en transaktion ifall någon ids inte finns
+// TODO: Gör om den här till en transaktion ifall någon ids inte finns. Det kanske också är bra att göra en generell funktion med transaktion.
 export function toggleActiveStatus(ids: string[], active: boolean) {
   return runDbQuery(sql<WatchDbRes[]>`UPDATE watch SET active = ${active} WHERE id in ${sql(ids)} RETURNING *`);
 }

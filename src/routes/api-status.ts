@@ -8,14 +8,25 @@ const apiStatusRoutes = new Router({
   prefix: "/api",
 });
 
+let numberOfConnectedUsers = 0;
+
 apiStatusRoutes.get(`/status`, (context: Context) => {
   const socket = context.upgrade();
 
   socket.onclose = () => {
-    console.log(`A client disconnected @ %c${currentTime()}`, "color: orange");
+    numberOfConnectedUsers--;
+
+    console.log(
+      `A client disconnected @ %c${currentTime()}`,
+      "color: orange",
+      `- Total connected users: ${numberOfConnectedUsers}`,
+    );
   };
 
-  socket.onopen = () => setInterval(() => broadcastApiStatus(socket), 1_000);
+  socket.onopen = () => {
+    numberOfConnectedUsers++;
+    setInterval(() => broadcastApiStatus(socket), 1_000);
+  };
 });
 
 function broadcastApiStatus(socket: WebSocket): void {
