@@ -10,12 +10,9 @@ export const getAllActiveWatches = () => runDbQuery(sql<WatchDbRes[]>`SELECT * F
 
 export const deleteWatchById = (id: string) => runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
 
-export function toggleActiveStatus(isActive: boolean, id: string) {
-  return runDbQuery(sql<WatchDbRes[]>`UPDATE watch SET active = ${isActive} WHERE id = ${id} RETURNING *`);
-}
-
-export function toggleAllStatuses(ids: string[], activateAll: boolean) {
-  return runDbQuery(sql`UPDATE watch SET active = ${activateAll} WHERE id in ${sql(ids)} RETURNING *`);
+// TODO: Gör om den här till en transaktion ifall någon ids inte finns
+export function toggleActiveStatus(ids: string[], active: boolean) {
+  return runDbQuery(sql<WatchDbRes[]>`UPDATE watch SET active = ${active} WHERE id in ${sql(ids)} RETURNING *`);
 }
 
 export function saveWatch(label: string, watchToScrape: string, scrapedWatches: ScrapedWatch[]) {

@@ -1,5 +1,5 @@
 import { httpErrors, Router } from "@oak/oak";
-import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus, toggleAllStatuses } from "../database/watch.ts";
+import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus } from "../database/watch.ts";
 import { validate } from "jsr:@std/uuid";
 import { WatchAndNotificationDto } from "../models/watch-dto.ts";
 import { WatchDbRes } from "../models/watch-db-res.ts";
@@ -42,24 +42,32 @@ scraperRoutes
 
     context.response.body = { deleteWatchId: context.params.id };
   })
-  .put(`/toggle-active-status`, async (context) => {
+  .put(`/toggle-active-statuses`, async (context) => {
     await validateBody(context);
 
-    const { id, active, label }: { id?: string; label?: string; active?: boolean } = await context.request.body.json();
+    const { ids, newActiveStatus }: { ids?: string[]; newActiveStatus?: boolean } = await context.request.body.json();
 
-    if (id === undefined || active === undefined || label === undefined) {
+    if (ids === undefined || newActiveStatus === undefined) {
       throw new httpErrors.UnprocessableEntity("id, active och label behöver finnas i body");
     }
 
-    const newActiveStatus = !active;
+    if (typeof newActiveStatus !== "boolean") {
+      const newActiveStatusProp = Object.keys({ newActiveStatus })[0];
+      throw new httpErrors.UnprocessableEntity(`${newActiveStatusProp} måste vara av typen boolean`);
+    }
 
-    const watchResult = await toggleActiveStatus(newActiveStatus, id);
+    if (ids.length === 0 || ids.some((id) => !validate(id))) {
+      const idsProp = Object.keys({ ids })[0];
+      throw new httpErrors.UnprocessableEntity(`${idsProp} måste innehålla minst ett id och måste vara av typen uuid v4`);
+    }
+
+    const watchResult = await toggleActiveStatus(ids, newActiveStatus);
 
     if (watchResult.error || watchResult.result?.length === 0) {
       throw new httpErrors.InternalServerError(`Kunde inte ändra aktiv status dbError: ${watchResult.error}`);
     }
 
-    const response = { active: newActiveStatus, ...watchResult };
+    const response = { ...watchResult, active: newActiveStatus };
 
     context.response.body = response;
   })
@@ -115,23 +123,6 @@ scraperRoutes
     };
 
     context.response.body = returnDto;
-  })
-  .patch("/toggle-all", async (context) => {
-    await validateBody(context);
-
-    const { ids, activateAll }: { ids?: string[]; activateAll?: boolean } = await context.request.body.json();
-
-    if (ids === undefined || activateAll === undefined) {
-      throw new httpErrors.UnprocessableEntity("ids och isToggleActive behöver finnas i body");
-    }
-
-    const toggleAllResult = await toggleAllStatuses(ids, activateAll);
-
-    if (toggleAllResult.error || toggleAllResult.result?.length === 0) {
-      throw new httpErrors.InternalServerError(`Kunde inte ändra aktiv status på alla bevakningar: ${toggleAllResult.error}`);
-    }
-
-    context.response.body = {};
   });
 
 function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification[]): WatchAndNotificationDto[] {
