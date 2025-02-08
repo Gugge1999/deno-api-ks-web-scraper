@@ -15,6 +15,7 @@ primary_region = "arn"
   http_checks = []
   processes = ["app"]
   protocol = "tcp"
+  #TODO: Kom ihåg att auto start / stop gör att "riktig" scraper inte fungerar
   auto_stop_machines = "stop"
   auto_start_machines = true
   min_machines_running = 0

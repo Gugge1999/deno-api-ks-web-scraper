@@ -6,6 +6,8 @@ import { sendEmailNotification, sendErrorEmailNotification } from "./email-notif
 import { errorLogger, infoLogger } from "./logger.ts";
 import { getAllActiveWatches, updateStoredWatches } from "../database/watch.ts";
 import { INTERVAL_IN_MS } from "../constants/config.ts";
+import { hejsanTesting, sql } from "../database/query.ts";
+import { WatchDbRes } from "../models/watch-db-res.ts";
 
 export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatchInfoRes> {
   let response: Response;
@@ -34,7 +36,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   if ($(CONTENT_ROW_TITLE_CLASS).length === 0) {
     return {
       result: null,
-      error: "Klocka gav 0 resultat. Försök igen med ny klocka",
+      error: "Sökning gav 0 resultat. Försök igen med ny sökterm",
     };
   }
 
@@ -100,6 +102,12 @@ export async function compareStoredWithScraped() {
   if (getAllWatchesDbRes.error || getAllWatchesDbRes.result === null) {
     return;
   }
+
+  // const iuqhwdiuqhw = `SELECT * FROM watch ORDER BY added`.toString();
+  //
+  // const hejsan = await hejsanTesting([iuqhwdiuqhw]);
+  //
+  // console.log("hejsan ", hejsan.result?.[0]);
 
   const activeWatchesLength = getAllWatchesDbRes.result.length;
 
