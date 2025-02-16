@@ -279,7 +279,7 @@ async function verifyJwt(token: string | undefined): Promise<JWTPayload | null> 
   }
 }
 
-// TODO: Typa bättre, kanske unknown?
+// TODO: Den här behövs nog inte
 async function validateBodyUser(context: any) {
   await validateBody(context);
 

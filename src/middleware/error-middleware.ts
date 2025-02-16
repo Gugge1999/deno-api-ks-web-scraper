@@ -14,13 +14,12 @@ const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
       stacktrace: stack,
     });
 
-    // TODO: Det är nog bra med en errors sql tabell för att lättare kunna se sql fel i prod
+    // TODO: Det är nog bra med en errors sql tabell för att lättare kunna se sql fel i prod. Det kanske också går att skapa en rutin i Postgres för att rensa de gamla felmeddelandena periodiskt
 
     ctx.response.status = status;
     ctx.response.body = {
-      stack,
-      status, // TODO: Behöver den skickas med i body? Den finns ju redan status
       message,
+      stack,
     };
   }
 };

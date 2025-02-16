@@ -1,20 +1,20 @@
-import { httpErrors, Router } from "@oak/oak";
-import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus } from "../database/watch.ts";
+import { Context, httpErrors, Router, RouterContext } from "@oak/oak";
 import { validate } from "jsr:@std/uuid";
-import { WatchAndNotificationDto } from "../models/watch-dto.ts";
-import { WatchDbRes } from "../models/watch-db-res.ts";
-import { scrapeWatchInfo } from "../services/scraper.ts";
-import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { getAllNotifications } from "../database/notification.ts";
+import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus } from "../database/watch.ts";
 import { Notification } from "../models/notification.ts";
+import { ScrapedWatch } from "../models/scraped-watches.ts";
+import { WatchDbRes } from "../models/watch-db-res.ts";
+import { WatchAndNotificationDto } from "../models/watch-dto.ts";
+import { scrapeWatchInfo } from "../services/scraper.ts";
 
 const scraperRoutes = new Router({
   prefix: "/api/bevakningar",
 });
 
 scraperRoutes
-  .get(`/all-watches`, async (context) => {
-    const [allWatches, notifications] = await Promise.all([await getAllWatches(), await getAllNotifications()]);
+  .get(`/all-watches`, async (context: Context) => {
+    const [allWatches, notifications] = await Promise.all([getAllWatches(), getAllNotifications()]);
 
     if (allWatches.error || notifications.error || notifications.result === null) {
       throw new httpErrors.InternalServerError(
@@ -29,10 +29,8 @@ scraperRoutes
 
     context.response.body = returnDto;
   })
-  .delete(`/delete-watch/:id`, async (context) => {
-    if (!context?.params?.id || !validate(context?.params?.id)) {
-      throw new httpErrors.UnprocessableEntity("Ogiltigt id för bevakning");
-    }
+  .delete(`/delete-watch/:id`, async (context: RouterContext<string>) => {
+    context.assert(validate(context?.params?.id), 422, "id måste vara av typen uuid v4");
 
     const deleteWatch = await deleteWatchById(context.params.id);
 
@@ -42,24 +40,16 @@ scraperRoutes
 
     context.response.body = { deleteWatchId: context.params.id };
   })
-  .put(`/toggle-active-statuses`, async (context) => {
+  .put(`/toggle-active-statuses`, async (context: Context) => {
     await validateBody(context);
+    const body = await context.request.body.json();
+    const { newActiveStatus, ids }: { newActiveStatus?: boolean; ids?: string[] } = body;
 
-    const { ids, newActiveStatus }: { ids?: string[]; newActiveStatus?: boolean } = await context.request.body.json();
-
-    if (ids === undefined || newActiveStatus === undefined) {
-      throw new httpErrors.UnprocessableEntity("id, active och label behöver finnas i body");
-    }
-
-    if (typeof newActiveStatus !== "boolean") {
-      const newActiveStatusProp = Object.keys({ newActiveStatus })[0];
-      throw new httpErrors.UnprocessableEntity(`${newActiveStatusProp} måste vara av typen boolean`);
-    }
-
-    if (ids.length === 0 || ids.some((id) => !validate(id))) {
-      const idsProp = Object.keys({ ids })[0];
-      throw new httpErrors.UnprocessableEntity(`${idsProp} måste innehålla minst ett id och måste vara av typen uuid v4`);
-    }
+    context.assert(typeof newActiveStatus === "boolean", 422, "newActiveStatus krävs i body och vara av typen bool");
+    context.assert(ids, 422, "ids krävs i body");
+    context.assert(ids.length !== 0, 422, "Minst ett id krävs i body");
+    context.assert(ids.every((id: string) => typeof id === "string"), 422, "Alla ids måste vara av typen string");
+    context.assert(ids.some((id: string) => validate(id)), 422, "Ids måste vara av typen uuid v4");
 
     const watchResult = await toggleActiveStatus(ids, newActiveStatus);
 
@@ -69,22 +59,17 @@ scraperRoutes
 
     context.response.body = {};
   })
-  .post(`/save-watch`, async (context) => {
+  .post(`/save-watch`, async (context: Context) => {
     await validateBody(context);
 
     const { label, watchToScrape }: { label?: string; watchToScrape?: string } = await context.request.body.json();
 
-    if (label === undefined || watchToScrape === undefined) {
-      throw new httpErrors.UnprocessableEntity("label och watchToScrape behöver finnas i body");
-    }
-
-    if (label.length < 3 || label.length > 35) {
-      throw new httpErrors.UnprocessableEntity("label måste vara mellan 3 och 35 tecken");
-    }
-
-    if (watchToScrape.length < 2 || watchToScrape.length > 35) {
-      throw new httpErrors.UnprocessableEntity("watchToScrape måste vara mellan 2 och 35 tecken");
-    }
+    context.assert(label && typeof label === "string", 422, "label krävs i body och vara av typen string");
+    context.assert(watchToScrape && typeof watchToScrape === "string", 422, "watchToScrape krävs i body och vara av typen string");
+    context.assert(label.length >= 3, 422, "label måste vara minst 3 tecken");
+    context.assert(label.length <= 35, 422, "label kan max vara 35 tecken");
+    context.assert(watchToScrape.length >= 3, 422, "watchToScrape måste vara minst 3 tecken");
+    context.assert(watchToScrape.length <= 35, 422, "watchToScrape kan max vara 35 tecken");
 
     const watchToScrapeLink =
       `https://klocksnack.se/search/1/?q=${watchToScrape}&t=post&c[child_nodes]=1&c[nodes][0]=11&c[title_only]=1&o=date` as const;
@@ -151,8 +136,7 @@ function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification
   return returnDto;
 }
 
-// TODO: Går den att typa bättre?
-export async function validateBody(context: any) {
+export async function validateBody(context: Context) {
   try {
     await context.request.body.json();
   } catch (e: unknown) {
