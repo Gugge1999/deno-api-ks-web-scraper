@@ -6,7 +6,6 @@ import "jsr:@std/dotenv/load";
 import { compareStoredWithScraped } from "./services/scraper.ts";
 import errorMiddleware from "./middleware/error-middleware.ts";
 import { currentTime } from "./services/time-and-date.ts";
-import { firebaseConfig } from "./constants/config.ts";
 import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
 import userRoutes from "./routes/user.ts";
@@ -32,6 +31,15 @@ app.use(scraperRoutes.allowedMethods());
 
 app.use(userRoutes.routes());
 app.use(userRoutes.allowedMethods());
+
+const firebaseConfig = {
+  apiKey: Deno.env.get("FBAPIKEY") ?? "",
+  authDomain: Deno.env.get("FBAUTHDOMAIN") ?? "",
+  projectId: Deno.env.get("FBPROJECTID") ?? "",
+  storageBucket: Deno.env.get("FBSTORAGEBUCKET") ?? "",
+  messagingSenderId: Deno.env.get("FBMESSAGINGSENDERID") ?? "",
+  appId: Deno.env.get("FBAPPID") ?? "",
+} as const;
 
 export const fbApp = initializeApp(firebaseConfig);
 
