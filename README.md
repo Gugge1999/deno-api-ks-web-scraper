@@ -1,10 +1,10 @@
-## TODO
-
-* Uppdatera postgres till senaste version: Verkar vara ganska svårt på fly.io - [Guide](https://fly.io/docs/postgres/managing/upgrades/)
-
-* Radera databasen ks-web-scraper och använd istället default postgres.
-
-* Det är kanske en bra idé att köra programmet som .exe / .tar. Det kanske gör att mindre minne används. Det är arch linux `deno compile --target aarch64-unknown-linux-gnu -o ks-scraper .\src\main.ts`. Det finns också flaggor för att begränsa minne och cpu. https://stackoverflow.com/a/72499787/14671400 
+> [!IMPORTANT]
+> ### TODO
+> Uppdatera postgres till senaste version: Verkar vara ganska svårt på fly.io - [Guide](https://fly.io/docs/postgres/managing/upgrades/)
+>
+> Radera databasen ks-web-scraper och använd istället default postgres.
+>
+> Det är kanske en bra idé att köra programmet som .exe / .tar. Det kanske gör att mindre minne används. Det är arch linux `deno compile --target aarch64-unknown-linux-gnu -o ks-scraper .\src\main.ts`. Det finns också flaggor för att begränsa minne och cpu. https://stackoverflow.com/a/72499787/14671400 
 
 ---
 ## Dokumentation
@@ -27,9 +27,9 @@ Kör med config som har 10 000 connections. För att öka tiden som lasten körs
 
 Docs: [Load testing](https://www.npmjs.com/package/autocannon)
 
-
+---
 > [!NOTE]
-> 
+> ### Länkar
 > [Deno blog](https://deno.com/blog)
 > 
 > [Docs](https://github.com/porsager/postgres) för porsager/postgres
