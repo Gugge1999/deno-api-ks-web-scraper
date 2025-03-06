@@ -28,9 +28,8 @@ Kör med config som har 10 000 connections. För att öka tiden som lasten körs
 Docs: [Load testing](https://www.npmjs.com/package/autocannon)
 
 
-<div align="center">
-
-### Länkar
+> [!NOTE]
+> 
 > [Deno blog](https://deno.com/blog)
 > 
 > [Docs](https://github.com/porsager/postgres) för porsager/postgres
@@ -40,5 +39,3 @@ Docs: [Load testing](https://www.npmjs.com/package/autocannon)
 > [JWT](https://github.com/wpcodevo/deno-refresh-jwt/blob/master/src/controllers/auth.controller.ts)
 > 
 > [CRUD + JWT](https://github.com/22mahmoud/deno_crud_jwt)
-
-</div>
