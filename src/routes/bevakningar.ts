@@ -14,6 +14,8 @@ const scraperRoutes = new Router({
 
 scraperRoutes
   .get(`/all-watches`, async (context: Context) => {
+    // TODO: Det är nog en bra idé att göra båda selects i samma anrop för att förhindra att två connections behöver skapas.
+    // Kanske med https://github.com/porsager/postgres?tab=readme-ov-file#multiple-statements-in-one-query ?
     const [allWatches, notifications] = await Promise.all([getAllWatches(), getAllNotifications()]);
 
     if (allWatches.error || notifications.error || notifications.result === null) {
