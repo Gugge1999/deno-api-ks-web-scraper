@@ -24,6 +24,10 @@
     "lineWidth": 135,
     "include": ["src/"]
   },
-  "exclude": ["node_modules/", "logs/", ".VSCodeCounter/"]
+  "exclude": [
+    "node_modules/",
+    "logs/",
+    ".VSCodeCounter/"
+  ]
 }
 
