@@ -25,15 +25,26 @@ export function saveWatch(label: string, watchToScrape: string, scrapedWatches: 
   return runDbQuery(newWatchQuery);
 }
 
+// TODO: Kolla att den här fortfarande fungerar
 export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: string) {
   return await sql.begin(async (sql) => {
-    const [watch] = await sql<WatchDbRes[]>`
+    console.time("stopwatch");
+
+    const watchQuery = sql<WatchDbRes[]>`
         UPDATE watch
             SET watches = (${JSON.stringify(newWatches)}), last_email_sent = now()
                 WHERE id = ${watchId}
                     RETURNING *`;
 
-    const [notification] = await insertNewNotification(watchId);
+    const notificationQuery = insertNewNotification(watchId);
+
+    const hejsan: { [k: string]: any } = ["hej"];
+
+    hejsan[Object.keys({ notificationQuery })[0]] = notificationQuery;
+
+    console.timeEnd("stopwatch");
+
+    const [watch, notification] = await Promise.all([runDbQuery(watchQuery), notificationQuery]);
 
     return {
       result: { watch, notification },
@@ -51,3 +62,25 @@ export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: s
     };
   });
 }
+
+// export async function runSqlTransaction<T>(params: {key: string, query: string}[]) {
+//   const hejsan: { [k: string]: any } = ["hej"];
+//
+//
+//   const query = await sql.begin(async (sql) => {
+//     let result: T[] = [];
+//     for (const { key, query } of params) {
+//       const res = await runDbQuery(sql<T[]>`${query}`);
+//       result = [...result, ...res];
+//     }
+//     return result;
+//   });
+//
+//
+//   hejsan[Object.keys({ params.key })[0]] = query;
+//
+//   return {
+//     result: hejsan,
+//     error: null,
+//   };
+// }

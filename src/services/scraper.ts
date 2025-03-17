@@ -103,7 +103,7 @@ export async function compareStoredWithScraped() {
     return;
   }
 
-  // const iuqhwdiuqhw = `SELECT * FROM watch ORDER BY added`.toString();
+  // const iuqhwdiuqhw = sql`update watch set active = false where active = false returning *`;
   //
   // const hejsan = await hejsanTesting([iuqhwdiuqhw]);
   //

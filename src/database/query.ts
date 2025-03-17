@@ -1,8 +1,13 @@
-import postgres from "postgres";
+import postgres, { PendingQuery, Row } from "postgres";
 import { errorLogger } from "../services/logger.ts";
 
 interface DbResponse<T> {
   result: Awaited<T> | null;
+  error: unknown;
+}
+
+interface DbResponseTransaction {
+  result: Awaited<postgres.RowList<postgres.Row[]>[]> | null;
   error: unknown;
 }
 
@@ -18,6 +23,33 @@ export async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
     };
   } catch (error) {
     errorLogger.error({ message: "Error i sql", stacktrace: error });
+
+    return {
+      result: null,
+      error: error,
+    };
+  }
+}
+
+export async function hejsanTesting(query: PendingQuery<Row[]>[]): Promise<DbResponseTransaction> {
+  try {
+    // const vette = query.map((q) => sql`${q}`);
+
+    const hoppsan = "update watch set active = false where active = false returning *";
+
+    const transactionResult = await sql.begin((sql) => [
+      sql`update watch set active = false where active = false returning *`,
+      sql`update watch set active = false where active = false returning *`,
+      // TODO: Det här fungerar inte
+      // ...query,
+    ]);
+
+    return {
+      result: transactionResult,
+      error: null,
+    };
+  } catch (error) {
+    errorLogger.error({ message: "Error i sql (transaktion)", stacktrace: error });
 
     return {
       result: null,
