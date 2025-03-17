@@ -9,12 +9,12 @@
     "@tajpouria/cors": "jsr:@tajpouria/cors@^1.2.1",
     "@std/datetime": "jsr:@std/datetime@^0.225.3",
     "@std/path": "jsr:@std/path@^1.0.8",
-    "@std/uuid": "jsr:@std/uuid@^1.0.5",
+    "@std/uuid": "jsr:@std/uuid@^1.0.4",
 
     "cheerio": "npm:cheerio@1.0.0",
-    "firebase-admin": "npm:firebase-admin@^13.2.0",
-    "jose": "npm:jose@^6.0.10",
-    "nodemailer": "npm:nodemailer@^6.10.0",
+    "firebase-admin": "npm:firebase-admin@^13.0.2",
+    "jose": "npm:jose@^5.9.6",
+    "nodemailer": "npm:nodemailer@^6.9.15",
     "postgres": "npm:postgres@3.4.5",
     "postgres-shift": "npm:postgres-shift@^0.1.0",
     "winston": "npm:winston@^3.17.0"
