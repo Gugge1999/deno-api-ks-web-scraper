@@ -11,6 +11,7 @@ interface DbResponseTransaction {
   error: unknown;
 }
 
+// TODO: Byt till ett bättre namn. Typ getDb
 export const sql = getDbUrl();
 
 export async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
