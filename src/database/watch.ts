@@ -4,11 +4,17 @@ import { runDbQuery, sql } from "./query.ts";
 import { errorLogger } from "../services/logger.ts";
 import { insertNewNotification } from "./notification.ts";
 
-export const getAllWatches = () => runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch ORDER BY added`);
+export function getAllWatches() {
+  return runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch ORDER BY added`);
+}
 
-export const getAllActiveWatches = () => runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
+export function getAllActiveWatches() {
+  return runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
+}
 
-export const deleteWatchById = (id: string) => runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
+export function deleteWatchById(id: string) {
+  return runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
+}
 
 // TODO: Gör om den här till en transaktion ifall någon ids inte finns. Det kanske också är bra att göra en generell funktion med transaktion.
 export function toggleActiveStatus(ids: string[], active: boolean) {
