@@ -16,7 +16,7 @@ export function deleteWatchById(id: string) {
   return runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
 }
 
-// TODO: Gör om den här till en transaktion ifall någon ids inte finns. Det kanske också är bra att göra en generell funktion med transaktion.
+// TODO: Om den här returnerar 0 rader betyder det att inga rader matchade ids
 export function toggleActiveStatus(ids: string[], active: boolean) {
   return runDbQuery(sql<WatchDbRes[]>`UPDATE watch SET active = ${active} WHERE id in ${sql(ids)} RETURNING *`);
 }
