@@ -11,8 +11,7 @@ interface DbResponseTransaction {
   error: unknown;
 }
 
-// TODO: Byt till ett bättre namn. Typ getDb
-export const sql = getDbUrl();
+export const sql = getDb();
 
 export async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
   try {
@@ -59,7 +58,7 @@ export async function hejsanTesting(query: PendingQuery<Row[]>[]): Promise<DbRes
   }
 }
 
-function getDbUrl() {
+function getDb() {
   // OBS: lägg märke till import från dotenv. Den kastar inte fel om import saknas men kommer inte att fungera
   if (Deno.env.get("ENV") === "dev") {
     const url = `postgres://${Deno.env.get("PGUSERNAME")}:${Deno.env.get("PGPASSWORD")}@localhost:5432/${Deno.env.get("PGDATABASE")}`;
