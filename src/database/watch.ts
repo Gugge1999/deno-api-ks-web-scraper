@@ -3,6 +3,7 @@ import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { runDbQuery, sql } from "./query.ts";
 import { errorLogger } from "../services/logger.ts";
 import { insertNewNotification } from "./notification.ts";
+import { SerializableParameter } from "postgres";
 
 export function getAllWatches() {
   return runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch ORDER BY added`);
@@ -25,7 +26,7 @@ export function saveWatch(label: string, watchToScrape: string, scrapedWatches: 
   const newWatchQuery = sql<WatchDbRes[]>`
     INSERT INTO watch(label, watch_to_scrape, active, watches)
         VALUES
-            (${label}, ${watchToScrape}, ${true}, ${JSON.stringify(scrapedWatches)})
+            (${label}, ${watchToScrape}, ${true}, ${scrapedWatches as unknown as SerializableParameter})
                 RETURNING *`;
 
   return runDbQuery(newWatchQuery);

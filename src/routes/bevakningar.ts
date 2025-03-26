@@ -90,7 +90,7 @@ scraperRoutes
 
     const dbRes = newWatch.result[0];
 
-    const watches: ScrapedWatch[] = JSON.parse(newWatch.result[0].watches);
+    const watches: ScrapedWatch[] = newWatch.result[0].watches;
 
     const returnDto: WatchAndNotificationDto = {
       id: dbRes.id,
@@ -114,7 +114,7 @@ function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification
   const returnDto: WatchAndNotificationDto[] = [];
 
   for (const scrapedWatch of allWatches) {
-    const watches: ScrapedWatch[] = JSON.parse(scrapedWatch.watches);
+    const watches: ScrapedWatch[] = scrapedWatch.watches;
     const notificationsForWatch = allNotifications.filter((n) => scrapedWatch.id === n.watch_id).map((m) => m.sent);
 
     const dto: WatchAndNotificationDto = {

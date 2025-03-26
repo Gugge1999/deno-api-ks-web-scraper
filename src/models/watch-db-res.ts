@@ -1,9 +1,10 @@
-/** OBS!: Den här har watches som string för att det är json i databasen  */
+import { ScrapedWatch } from "./scraped-watches.ts";
+
 export interface WatchDbRes {
   id: string;
   watch_to_scrape: string;
   label: string;
-  watches: string;
+  watches: ScrapedWatch[];
   active: boolean;
   last_email_sent: Date | null;
   added: Date;
