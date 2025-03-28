@@ -6,6 +6,8 @@ import { insertNewNotification } from "./notification.ts";
 import { SerializableParameter } from "postgres";
 
 export function getAllWatches() {
+  console.log("sql hejsan", sql);
+
   return runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch ORDER BY added`);
 }
 
@@ -45,13 +47,9 @@ export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: s
 
     const notificationQuery = insertNewNotification(watchId);
 
-    const hejsan: { [k: string]: any } = ["hej"];
-
-    hejsan[Object.keys({ notificationQuery })[0]] = notificationQuery;
-
     console.timeEnd("stopwatch");
 
-    const [watch, notification] = await Promise.all([runDbQuery(watchQuery), notificationQuery]);
+    const [watch, notification] = await Promise.all([runDbQuery(watchQuery), runDbQuery(notificationQuery)]);
 
     return {
       result: { watch, notification },
