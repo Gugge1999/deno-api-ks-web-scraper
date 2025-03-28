@@ -37,12 +37,13 @@ export async function hejsanTesting(query: PendingQuery<Row[]>[]): Promise<DbRes
 
     const hoppsan = "update watch set active = false where active = false returning *";
 
-    const transactionResult = await sql.begin((sql) => [
-      sql`update watch set active = false where active = false returning *`,
-      sql`update watch set active = false where active = false returning *`,
-      // TODO: Det här fungerar inte
-      // ...query,
-    ]);
+    const transactionResult = await sql.begin((sql) => {
+      const hejsan = "update watch set active = false where active = false returning *";
+
+      return [
+        sql`update watch set active = false where active = false returning *`,
+      ];
+    });
 
     return {
       result: transactionResult,
@@ -65,7 +66,9 @@ function getDb() {
   if (Deno.env.get("ENV") === "dev") {
     const url = `postgres://${Deno.env.get("PGUSERNAME")}:${Deno.env.get("PGPASSWORD")}@localhost:5432/${Deno.env.get("PGDATABASE")}`;
 
-    return postgres(url);
+    return postgres(url, {
+      idle_timeout: 360,
+    });
   }
 
   const prodDbUrl = Deno.env.get("DATABASE_URL") ?? "";
