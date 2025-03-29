@@ -63,16 +63,22 @@ function getDb() {
   console.log("Här");
 
   const options: postgres.Options<Record<string | number | symbol, never>> = {
-    idle_timeout: 360,
+    idle_timeout: 2,
+    keep_alive: 1,
+    connect_timeout: 2,
+    timeout: 2,
   };
 
   // OBS: lägg märke till import från dotenv. Den kastar inte fel om import saknas men kommer inte att fungera
   if (Deno.env.get("ENV") === "dev") {
     const url = `postgres://${Deno.env.get("PGUSERNAME")}:${Deno.env.get("PGPASSWORD")}@localhost:5432/${Deno.env.get("PGDATABASE")}`;
 
-    return postgres(url, options);
+    return postgres(url);
   }
 
   const prodDbUrl = Deno.env.get("DATABASE_URL") ?? "";
-  return postgres(prodDbUrl, options);
+
+  console.log("prod url: ", prodDbUrl);
+
+  return postgres(`${prodDbUrl}?sslmode=no-verify`);
 }
