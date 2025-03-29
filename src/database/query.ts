@@ -62,15 +62,17 @@ export async function hejsanTesting(query: PendingQuery<Row[]>[]): Promise<DbRes
 function getDb() {
   console.log("Här");
 
+  const options: postgres.Options<Record<string | number | symbol, never>> = {
+    idle_timeout: 360,
+  };
+
   // OBS: lägg märke till import från dotenv. Den kastar inte fel om import saknas men kommer inte att fungera
   if (Deno.env.get("ENV") === "dev") {
     const url = `postgres://${Deno.env.get("PGUSERNAME")}:${Deno.env.get("PGPASSWORD")}@localhost:5432/${Deno.env.get("PGDATABASE")}`;
 
-    return postgres(url, {
-      idle_timeout: 360,
-    });
+    return postgres(url, options);
   }
 
   const prodDbUrl = Deno.env.get("DATABASE_URL") ?? "";
-  return postgres(prodDbUrl);
+  return postgres(prodDbUrl, options);
 }
