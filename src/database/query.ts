@@ -80,5 +80,5 @@ function getDb() {
 
   console.log("prod url: ", prodDbUrl);
 
-  return postgres(`${prodDbUrl}?sslmode=no-verify`);
+  return postgres(prodDbUrl);
 }
