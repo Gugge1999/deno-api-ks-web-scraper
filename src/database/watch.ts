@@ -6,8 +6,6 @@ import { insertNewNotification } from "./notification.ts";
 import { SerializableParameter } from "postgres";
 
 export function getAllWatches() {
-  console.log("sql hejsan", sql);
-
   return runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch ORDER BY added`);
 }
 
