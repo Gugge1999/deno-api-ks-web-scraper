@@ -19,8 +19,8 @@
     "jsr:@std/media-types@1": "1.1.0",
     "jsr:@std/path@1": "1.0.8",
     "jsr:@std/path@^1.0.8": "1.0.8",
-    "jsr:@std/uuid@*": "1.0.6",
-    "jsr:@std/uuid@^1.0.6": "1.0.6",
+    "jsr:@std/uuid@*": "1.0.5",
+    "jsr:@std/uuid@^1.0.5": "1.0.5",
     "jsr:@tajpouria/cors@^1.2.1": "1.2.1",
     "npm:@firebase/app@0.10.17": "0.10.17",
     "npm:@firebase/auth@1.8.1": "1.8.1_@firebase+app@0.10.17",
@@ -97,8 +97,8 @@
     "@std/path@1.0.8": {
       "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
     },
-    "@std/uuid@1.0.6": {
-      "integrity": "f3ca728cad488a4bed271974e43721c379ad25a0ae17be7967edee036beba9c5",
+    "@std/uuid@1.0.5": {
+      "integrity": "d0b8da73ec1934c32346e3a090d526f77dded587664859afabae0cc2c782428b",
       "dependencies": [
         "jsr:@std/bytes@^1.0.5",
         "jsr:@std/crypto@^1.0.4"
@@ -1380,7 +1380,7 @@
       "jsr:@oak/oak@^17.1.4",
       "jsr:@std/datetime@~0.225.3",
       "jsr:@std/path@^1.0.8",
-      "jsr:@std/uuid@^1.0.6",
+      "jsr:@std/uuid@^1.0.5",
       "jsr:@tajpouria/cors@^1.2.1",
       "npm:cheerio@1.0.0",
       "npm:firebase-admin@^13.2.0",

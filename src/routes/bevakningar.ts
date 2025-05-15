@@ -16,6 +16,8 @@ scraperRoutes
   .get(`/all-watches`, async (context: Context) => {
     // TODO: Det är nog en bra idé att göra båda selects i samma anrop för att förhindra att två connections behöver skapas.
     // Kanske med https://github.com/porsager/postgres?tab=readme-ov-file#multiple-statements-in-one-query ?
+    // Vänta 1 sekund mellan varje anrop till KS
+    await new Promise((resolve) => setTimeout(resolve, 7_000));
 
     const [allWatches, notifications] = await Promise.all([getAllWatches(), getAllNotifications()]);
 
@@ -108,7 +110,7 @@ scraperRoutes
       },
     };
 
-    context.response.status = 201;
+    // TODO: Skicka tillbaka 201 istället för 200
     context.response.body = returnDto;
   });
 

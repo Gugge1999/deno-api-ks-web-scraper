@@ -28,12 +28,12 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
 
   const body = await response.text();
 
-  const cheerio = load(body);
+  const $ = load(body);
 
   const CONTENT_ROW_TITLE_CLASS = ".contentRow-title";
 
   // Länken gav inga resultat.
-  if (cheerio(CONTENT_ROW_TITLE_CLASS).length === 0) {
+  if ($(CONTENT_ROW_TITLE_CLASS).length === 0) {
     return {
       result: null,
       error: "Sökning gav 0 resultat. Försök igen med ny sökterm",
@@ -45,12 +45,12 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   const links: string[] = [];
 
   // Titel
-  cheerio(CONTENT_ROW_TITLE_CLASS)
+  $(CONTENT_ROW_TITLE_CLASS)
     .get()
     .map((element: unknown) => {
       // TODO: Det här gåt nog att göra enklare och bara plocka ut texten för namnet på annonsen. Inte badge för status också
       return titles.push(
-        cheerio(element)
+        $(element)
           .text()
           .replace(
             // TODO: Den här verkar ta med &nbsp också
@@ -62,10 +62,10 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
     });
 
   // Datum
-  cheerio(".u-dt")
+  $(".u-dt")
     .get()
     .map((element: unknown) => {
-      const date = Number.parseInt(cheerio(element).attr("data-time") ?? "");
+      const date = Number.parseInt($(element).attr("data-time") ?? "");
 
       const isoDate = new Date(date * 1000).toISOString();
 
@@ -75,9 +75,9 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
     });
 
   // Länk
-  cheerio(CONTENT_ROW_TITLE_CLASS)
+  $(CONTENT_ROW_TITLE_CLASS)
     .get()
-    .map((element: unknown) => links.push(`https://klocksnack.se${cheerio(element).find("a").attr("href")}`));
+    .map((element: unknown) => links.push(`https://klocksnack.se${$(element).find("a").attr("href")}`));
 
   const scrapedWatches: ScrapedWatch[] = [];
 
