@@ -25,6 +25,7 @@
     "npm:@firebase/auth@1.8.1": "1.8.1_@firebase+app@0.10.17",
     "npm:@types/bcrypt@^5.0.2": "5.0.2",
     "npm:@types/cheerio@~0.22.35": "0.22.35",
+    "npm:@types/node@*": "22.13.10",
     "npm:@types/nodemailer@*": "6.4.17",
     "npm:cheerio@1.0.0": "1.0.0",
     "npm:firebase-admin@^13.2.0": "13.2.0",
