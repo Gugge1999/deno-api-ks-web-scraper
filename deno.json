@@ -7,14 +7,14 @@
   "imports": {
     "@oak/oak": "jsr:@oak/oak@^17.1.4",
     "@tajpouria/cors": "jsr:@tajpouria/cors@^1.2.1",
-    "@std/datetime": "jsr:@std/datetime@^0.225.3",
-    "@std/path": "jsr:@std/path@^1.0.8",
-    "@std/uuid": "jsr:@std/uuid@^1.0.5",
+    "@std/datetime": "jsr:@std/datetime@^0.225.4",
+    "@std/path": "jsr:@std/path@^1.0.9",
+    "@std/uuid": "jsr:@std/uuid@^1.0.7",
 
     "cheerio": "npm:cheerio@1.0.0",
     "firebase-admin": "npm:firebase-admin@^13.2.0",
-    "jose": "npm:jose@^6.0.10",
-    "nodemailer": "npm:nodemailer@^6.10.0",
+    "jose": "npm:jose@^6.0.11",
+    "nodemailer": "npm:nodemailer@^6.10.1",
     "postgres": "npm:postgres@3.4.5",
     "postgres-shift": "npm:postgres-shift@^0.1.0",
     "winston": "npm:winston@^3.17.0"
