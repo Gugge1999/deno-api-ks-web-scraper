@@ -16,15 +16,12 @@ apiStatusRoutes.get(`/status`, (context: Context) => {
   socket.onclose = () => {
     numberOfConnectedUsers--;
 
-    console.log(
-      `A client disconnected @ %c${currentTime()}`,
-      "color: orange",
-      `- Total connected users: ${numberOfConnectedUsers}`,
-    );
+    logConnectedUsersToConsole("disconnect");
   };
 
   socket.onopen = () => {
     numberOfConnectedUsers++;
+    logConnectedUsersToConsole("connect");
     setInterval(() => broadcastApiStatus(socket), 1_000);
   };
 });
@@ -33,6 +30,14 @@ function broadcastApiStatus(socket: WebSocket): void {
   const apiStatus = getApiStatus();
 
   socket.send(JSON.stringify(apiStatus));
+}
+
+function logConnectedUsersToConsole(type: "connect" | "disconnect"): void {
+  console.log(
+    `A client ${type === "connect" ? "connected" : "disconnected"} @ %c${currentTime()}`,
+    "color: orange",
+    `- Total connected users: ${numberOfConnectedUsers}`,
+  );
 }
 
 function getApiStatus(): ApiStatus {
