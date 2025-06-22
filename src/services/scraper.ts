@@ -6,8 +6,7 @@ import { sendEmailNotification, sendErrorEmailNotification } from "./email-notif
 import { errorLogger, infoLogger } from "./logger.ts";
 import { getAllActiveWatches, updateStoredWatches } from "../database/watch.ts";
 import { INTERVAL_IN_MS } from "../constants/config.ts";
-import { hejsanTesting, sql } from "../database/query.ts";
-import { WatchDbRes } from "../models/watch-db-res.ts";
+import { setTimeout as setTimeoutPromise } from "node:timers/promises";
 
 export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatchInfoRes> {
   let response: Response;
@@ -96,60 +95,72 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   };
 }
 
-export async function compareStoredWithScraped() {
-  const getAllWatchesDbRes = await getAllActiveWatches();
+// TODO: Om den här misslyckas kommer inte appen att starta igen. Tror jag
+export async function compareStoredWithScraped(): Promise<boolean> {
+  try {
+    const getAllWatchesDbRes = await getAllActiveWatches();
 
-  if (getAllWatchesDbRes.error || getAllWatchesDbRes.result === null) {
-    return;
-  }
-
-  // const iuqhwdiuqhw = sql`update watch set active = false where active = false returning *`;
-  //
-  // const hejsan = await hejsanTesting([iuqhwdiuqhw]);
-  //
-  // console.log("hejsan ", hejsan.result?.[0]);
-
-  const activeWatchesLength = getAllWatchesDbRes.result.length;
-
-  activeWatchesLength === 0 ? console.log(`No active watches @ %c${currentDateAndTime()}`, "color: deepskyblue") : console.log(
-    `Scraping ${activeWatchesLength} ${activeWatchesLength === 1 ? "watch" : "watches"} @ %c${currentDateAndTime()}`,
-    "color: deepskyblue",
-  );
-
-  const storedActiveWatches = getAllWatchesDbRes.result;
-  for (const watch of storedActiveWatches) {
-    const storedWatch = watch;
-
-    const storedWatches: ScrapedWatch[] = storedWatch.watches;
-
-    const scrapedWatches = await scrapeWatchInfo(storedWatch.watch_to_scrape);
-
-    if (scrapedWatches.error || scrapedWatches.result === null) {
-      return;
+    if (getAllWatchesDbRes.error || getAllWatchesDbRes.result === null) {
+      return false;
     }
 
-    // Vänta 1 sekund mellan varje anrop till KS
-    await new Promise((resolve) => setTimeout(resolve, 1_000));
+    // const iuqhwdiuqhw = sql`update watch set active = false where active = false returning *`;
+    //
+    // const hejsan = await hejsanTesting([iuqhwdiuqhw]);
+    //
+    // console.log("hejsan ", hejsan.result?.[0]);
 
-    const intersectingNewScrapedWatches = scrapedWatches.result.filter(({ postedDate: a }) =>
-      !storedWatches.some(({ postedDate: b }) => b === a)
+    const activeWatchesLength = getAllWatchesDbRes.result.length;
+
+    activeWatchesLength === 0 ? console.log(`No active watches @ %c${currentDateAndTime()}`, "color: deepskyblue") : console.log(
+      `Scraping ${activeWatchesLength} ${activeWatchesLength === 1 ? "watch" : "watches"} @ %c${currentDateAndTime()}`,
+      "color: deepskyblue",
     );
 
-    if (intersectingNewScrapedWatches.length > 0) {
-      const updateWatchRes = await updateStoredWatches(scrapedWatches.result, storedWatch.id);
+    const storedActiveWatches = getAllWatchesDbRes.result;
+    for (const watch of storedActiveWatches) {
+      const storedWatch = watch;
 
-      if (updateWatchRes.error || updateWatchRes.result === null) {
-        return;
+      const storedWatches: ScrapedWatch[] = storedWatch.watches;
+
+      const scrapedWatches = await scrapeWatchInfo(storedWatch.watch_to_scrape);
+
+      if (scrapedWatches.error || scrapedWatches.result === null) {
+        return false;
       }
 
-      await handleNewScrapedWatch(intersectingNewScrapedWatches);
+      const intersectingNewScrapedWatches = scrapedWatches.result.filter(({ postedDate: a }) =>
+        !storedWatches.some(({ postedDate: b }) => b === a)
+      );
+
+      if (intersectingNewScrapedWatches.length > 0) {
+        const updateWatchRes = await updateStoredWatches(scrapedWatches.result, storedWatch.id);
+
+        if (updateWatchRes.error || updateWatchRes.result === null) {
+          return false;
+        }
+
+        await handleNewScrapedWatch(intersectingNewScrapedWatches);
+      }
     }
+
+    return true;
+  } catch (err) {
+    errorLogger.error({
+      message: "compareStoredWithScraped failed.",
+      stacktrace: err,
+    });
+
+    return false;
   }
 }
 
 setInterval(compareStoredWithScraped, INTERVAL_IN_MS);
 
 async function handleNewScrapedWatch(newScrapedWatches: ScrapedWatch[]) {
+  // Vänta 1 sekund mellan varje mail
+  await setTimeoutPromise(1_000);
+
   for (const watch of newScrapedWatches) {
     await sendNotification(watch);
   }
@@ -159,7 +170,7 @@ async function sendNotification(watch: ScrapedWatch) {
   try {
     await sendEmailNotification(emailText(watch));
 
-    infoLogger.info({ message: `Email sent with watch: ${JSON.stringify(watch)}` });
+    infoLogger.info({ message: `Email sent with watch name: ${(watch.name)}, link: ${watch.link}` });
 
     const notificationDelay = Deno.env.get("ENV") === "dev" ? 1 : 5_000;
 

@@ -39,7 +39,7 @@ export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: s
 
     const watchQuery = sql<WatchDbRes[]>`
         UPDATE watch
-            SET watches = (${JSON.stringify(newWatches)}), last_email_sent = now()
+            SET watches = ${newWatches as unknown as SerializableParameter}, last_email_sent = now()
                 WHERE id = ${watchId}
                     RETURNING *`;
 
