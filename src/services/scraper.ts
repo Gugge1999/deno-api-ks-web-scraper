@@ -29,10 +29,10 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
 
   const $ = load(body);
 
-  const CONTENT_ROW_TITLE_CLASS = ".contentRow-title";
+  const contentRowTitleClass = ".contentRow-title";
 
   // Länken gav inga resultat.
-  if ($(CONTENT_ROW_TITLE_CLASS).length === 0) {
+  if ($(contentRowTitleClass).length === 0) {
     return {
       result: null,
       error: "Sökning gav 0 resultat. Försök igen med ny sökterm",
@@ -44,7 +44,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   const links: string[] = [];
 
   // Titel
-  $(CONTENT_ROW_TITLE_CLASS)
+  $(contentRowTitleClass)
     .get()
     .map((element: unknown) => {
       // TODO: Det här gåt nog att göra enklare och bara plocka ut texten för namnet på annonsen. Inte badge för status också
@@ -74,7 +74,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
     });
 
   // Länk
-  $(CONTENT_ROW_TITLE_CLASS)
+  $(contentRowTitleClass)
     .get()
     .map((element: unknown) => links.push(`https://klocksnack.se${$(element).find("a").attr("href")}`));
 
@@ -86,6 +86,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
       postedDate: dates[index],
       link: links[index],
     };
+
     scrapedWatches.push(currentWatchInfo);
   });
 
@@ -168,7 +169,7 @@ async function handleNewScrapedWatch(newScrapedWatches: ScrapedWatch[]) {
 
 async function sendNotification(watch: ScrapedWatch) {
   try {
-    await sendEmailNotification(emailText(watch));
+    await sendEmailNotification(getEmailText(watch));
 
     infoLogger.info({ message: `Email sent with watch name: ${(watch.name)}, link: ${watch.link}` });
 
@@ -185,7 +186,14 @@ async function sendNotification(watch: ScrapedWatch) {
   }
 }
 
-const emailText = (watch: ScrapedWatch) => `${watch.name}\n\nLänk: ${watch.link}\n\nDetta mail skickades: ${currentTime()}`;
+function getEmailText(watch: ScrapedWatch) {
+  return `
+${watch.name}
+
+Länk: ${watch.link}
+
+Detta mail skickades: ${currentTime()}`;
+}
 
 interface ScrapeWatchInfoRes {
   result: ScrapedWatch[] | null;

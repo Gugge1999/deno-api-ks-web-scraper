@@ -39,11 +39,11 @@ const firebaseConfig = {
   storageBucket: Deno.env.get("FBSTORAGEBUCKET") ?? "",
   messagingSenderId: Deno.env.get("FBMESSAGINGSENDERID") ?? "",
   appId: Deno.env.get("FBAPPID") ?? "",
-} as const;
+} as const satisfies Record<string, string>;
 
 export const fbApp = initializeApp(firebaseConfig);
 
-// OBS: Lägg märke till import av @std/dotenv/load. Utan den fungerar inte .env
+// OBS: Lägg märke till import av jsr:@std/dotenv/load. Utan den fungerar inte .env
 const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 
 const cert = JSON.parse(Deno.env.get("FBSERVICEACCOUNTKEY") ?? "");

@@ -6,12 +6,12 @@ import { sql } from "../database/query.ts";
 shift({
   sql,
   path: fromFileUrl(new URL("../../migrations", import.meta.url)),
-  before: () => {
-    console.log(`Running migrating @${currentDateAndTime()}`);
+  before: ({ migration_id }: { migration_id: number }) => {
+    console.log(`Migrating with id: ${migration_id} @ ${currentDateAndTime()}`);
   },
 })
   .then(() => {
-    console.log(`Migrations completed successfully @${currentDateAndTime()}`);
+    console.log(`Migrations completed successfully @ ${currentDateAndTime()}`);
     Deno.exit();
   })
   .catch((err: unknown) => {

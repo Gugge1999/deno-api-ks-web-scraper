@@ -1,6 +1,8 @@
 import postgres, { PendingQuery, Row } from "postgres";
 import { errorLogger } from "../services/logger.ts";
 
+export const sql = await getDb();
+
 interface DbResponse<T> {
   result: Awaited<T> | null;
   error: unknown;
@@ -10,8 +12,6 @@ interface DbResponseTransaction {
   result: Awaited<postgres.RowList<postgres.Row[]>[]> | null;
   error: unknown;
 }
-
-export const sql = getDb();
 
 export async function runDbQuery<T>(query: T): Promise<DbResponse<T>> {
   try {
@@ -59,9 +59,11 @@ export async function hejsanTesting(query: PendingQuery<Row[]>[]): Promise<DbRes
   }
 }
 
-function getDb() {
-  // OBS: lägg märke till import från dotenv. Den kastar inte fel om import saknas men kommer inte att fungera
-  if (Deno.env.get("ENV") === "dev") {
+async function getDb() {
+  // Behövs för att sql migrations ska fungera
+  await import("jsr:@std/dotenv/load");
+
+  if (Deno.env.get("ENV")?.toLowerCase() === "dev") {
     const url = `postgres://${Deno.env.get("PGUSERNAME")}:${Deno.env.get("PGPASSWORD")}@localhost:5432/${Deno.env.get("PGDATABASE")}`;
 
     return postgres(url);
