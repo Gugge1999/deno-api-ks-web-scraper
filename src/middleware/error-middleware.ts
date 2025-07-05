@@ -7,10 +7,10 @@ const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
   } catch (err: unknown) {
     const stack = getStack(err);
     const status = getErrorStatus(err);
-    const message = getErrMessage(err);
+    const msg = getErrMessage(err);
 
     errorLogger.error({
-      message: message,
+      message: msg,
       stacktrace: stack,
     });
 
@@ -18,7 +18,7 @@ const errorMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
 
     ctx.response.status = status;
     ctx.response.body = {
-      message,
+      message: msg,
       stack,
     };
   }
@@ -28,6 +28,8 @@ function getStack(err: unknown): unknown {
   if (err && typeof err === "object" && "stack" in err) {
     return err.stack;
   }
+
+  errorLogger.error({ message: `Kunde inte hitta stacktrace i error-objektet. Angivet error-objekt: ${err}` });
 
   return "";
 }
@@ -40,6 +42,8 @@ function getErrorStatus(err: unknown): number {
   if (err && typeof err === "object" && "statusCode" in err && typeof err.statusCode === "number") {
     return err.statusCode;
   }
+
+  errorLogger.error({ message: `Kunde inte hitta status code i error-objektet. Angivet error-objekt: ${err}` });
 
   return Status.InternalServerError;
 }
