@@ -7,8 +7,7 @@
 > * Radera databasen ks-web-scraper och använd istället default postgres.
 >
 > * Det är kanske en bra idé att köra programmet som .exe / .tar. Det kanske gör att mindre minne används. Det är arch linux `deno compile --target aarch64-unknown-linux-gnu -o ks-scraper .\src\main.ts`. Det finns också flaggor för att begränsa minne och cpu. https://stackoverflow.com/a/72499787/14671400 
-> 
-> * Lägg till kolumn för updated på alla tabeller
+
 
 ---
 ## Dokumentation
@@ -17,8 +16,8 @@
 Username och pass finns i mapp på desktop (Om du behöver logga in igen)
  
 1. Ansluta: `fly postgres connect -a api-ks-web-scraper-db`
-1. Anslut till databas: `\c api-ks-web-scraper`
-1. `select * from watch \g` (`\g` används för att visa att sql:en är slut och postgres ska exekvera det som finns före)
+1. Anslut till databas: `\c api_ks_web_scraper`
+1. `select * from watch;` (**OBS!** Notera `;` utan det kommer sql:en att försätta på nästa rad)
 1. Lista alla tabeller: `\dt`
 1. Visa datatyper, pk och fk på en tabell: `\d watch`
 
