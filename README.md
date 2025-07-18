@@ -7,6 +7,8 @@
 > * Radera databasen ks-web-scraper och använd istället default postgres.
 >
 > * Det är kanske en bra idé att köra programmet som .exe / .tar. Det kanske gör att mindre minne används. Det är arch linux `deno compile --target aarch64-unknown-linux-gnu -o ks-scraper .\src\main.ts`. Det finns också flaggor för att begränsa minne och cpu. https://stackoverflow.com/a/72499787/14671400 
+>
+> * Läs: [The Nine Node Pillars](https://www.platformatichq.com/node-principles)
 
 
 ---

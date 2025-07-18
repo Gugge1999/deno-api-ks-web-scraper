@@ -1,5 +1,5 @@
 import postgres, { PendingQuery, Row } from "postgres";
-import { errorLogger } from "../services/logger.ts";
+import { errorLogger, infoLogger } from "../services/logger.ts";
 
 export const sql = await getDb();
 
@@ -63,13 +63,23 @@ async function getDb() {
   // Behövs för att sql migrations ska fungera
   await import("jsr:@std/dotenv/load");
 
-  if (Deno.env.get("ENV")?.toLowerCase() === "dev") {
+  const env = Deno.env.get("ENV")?.toLowerCase() ?? "";
+
+  if (env === "") {
+    errorLogger.error("ENV is not set in environment variables");
+  }
+
+  if (env === "dev") {
     const url = `postgres://${Deno.env.get("PGUSERNAME")}:${Deno.env.get("PGPASSWORD")}@localhost:5432/${Deno.env.get("PGDATABASE")}`;
 
     return postgres(url);
   }
 
   const prodDbUrl = Deno.env.get("DATABASE_URL") ?? "";
+
+  if (prodDbUrl === "") {
+    errorLogger.error("DATABASE_URL is not set in environment variables");
+  }
 
   return postgres(prodDbUrl, {
     idle_timeout: 20,

@@ -15,7 +15,9 @@ export const errorLogger = createLogger({
     errors({ stack: true }),
     timestamp({ format: TIME_FORMAT_LOGGER }),
     prettyPrint(),
+    format.colorize({ all: true }),
   ),
+
   exitOnError: false,
   // TODO: Den finns stöd för postgres log, det är dock ett tredjeparts bibliotek: https://www.npmjs.com/package/winston-postgresql
   transports: [new transports.Console(), new transports.File({ filename: errorLoggerPathName })],
