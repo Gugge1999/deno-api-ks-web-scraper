@@ -7,14 +7,26 @@ import { errorLogger, infoLogger } from "./logger.ts";
 import { getAllActiveWatches, updateStoredWatches } from "../database/watch.ts";
 import { INTERVAL_IN_MS } from "../constants/config.ts";
 import { setTimeout as setTimeoutPromise } from "node:timers/promises";
+import { retry, RetryError, type RetryOptions } from "jsr:@std/async";
+
+const retryOptions: RetryOptions = {
+  maxAttempts: 3,
+  minTimeout: 250,
+  multiplier: 2,
+  jitter: 0,
+};
 
 export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatchInfoRes> {
   let response: Response;
 
   try {
-    // TODO: Skapa kod för retry?
-    response = await fetch(watchToScrape);
+    response = await retry(() => fetch(watchToScrape), retryOptions);
   } catch (err) {
+    if (err instanceof RetryError) {
+      errorLogger.error({ Msg: `Retry error : + ${err.message}` });
+      errorLogger.error({ Cause: `Error cause : + ${err.cause}` });
+    }
+
     const message = `Kunde inte hämta url. Angiven url: ${watchToScrape}`;
 
     errorLogger.error({ message });

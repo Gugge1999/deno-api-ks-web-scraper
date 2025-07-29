@@ -101,7 +101,7 @@ scraperRoutes
       },
     };
 
-    // TODO: Skicka tillbaka 201 istället för 200
+    context.response.status = 201;
     context.response.body = returnDto;
   });
 

@@ -1,4 +1,4 @@
-import { runDbQuery, sql } from "./query.ts";
+import { sql } from "./query.ts";
 import { Notification } from "../models/notification.ts";
 
 export function insertNewNotification(watchId: string) {
@@ -8,5 +8,3 @@ export function insertNewNotification(watchId: string) {
             (${watchId})
                 RETURNING *`;
 }
-
-export const getAllNotifications = () => runDbQuery(sql<Notification[]>`SELECT * FROM notification`);

@@ -5,10 +5,6 @@ import { errorLogger } from "../services/logger.ts";
 import { insertNewNotification } from "./notification.ts";
 import { SerializableParameter } from "postgres";
 
-export function getAllWatches() {
-  return runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch ORDER BY added`);
-}
-
 export function getAllActiveWatches() {
   return runDbQuery(sql<WatchDbRes[]>`SELECT * FROM watch WHERE active = true ORDER BY added`);
 }
@@ -17,7 +13,6 @@ export function deleteWatchById(id: string) {
   return runDbQuery(sql`DELETE FROM watch WHERE id = ${id}`);
 }
 
-// TODO: Om den här returnerar 0 rader betyder det att inga rader matchade ids
 export function toggleActiveStatus(ids: string[], active: boolean) {
   return runDbQuery(sql<WatchDbRes[]>`UPDATE watch SET active = ${active} WHERE id in ${sql(ids)} RETURNING *`);
 }
@@ -50,7 +45,6 @@ export function getWatchesAndNotifications() {
       order by added;`);
 }
 
-// TODO: Kolla att den här fortfarande fungerar
 export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: string) {
   return await sql.begin(async (sql) => {
     const watchQuery = sql<WatchDbRes[]>`
