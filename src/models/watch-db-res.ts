@@ -9,3 +9,7 @@ export interface WatchDbRes {
   last_email_sent: Date | null;
   added: Date;
 }
+
+export interface WatchAndNotificationDbRes extends WatchDbRes {
+  notifications: Date[];
+}

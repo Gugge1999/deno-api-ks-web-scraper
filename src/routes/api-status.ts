@@ -34,7 +34,7 @@ function broadcastApiStatus(socket: WebSocket): void {
 
 function logConnectedUsersToConsole(type: "connect" | "disconnect"): void {
   console.log(
-    `A client ${type === "connect" ? "connected" : "disconnected"} @ %c${currentTime()}`,
+    `Client ${type === "connect" ? "con" : "disc"} @ %c${currentTime()}`,
     "color: orange",
     `- Total connected users: ${numberOfConnectedUsers}`,
   );

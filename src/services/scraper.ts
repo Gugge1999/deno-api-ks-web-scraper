@@ -12,6 +12,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   let response: Response;
 
   try {
+    // TODO: Skapa kod för retry?
     response = await fetch(watchToScrape);
   } catch (err) {
     const message = `Kunde inte hämta url. Angiven url: ${watchToScrape}`;
@@ -96,12 +97,11 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   };
 }
 
-// TODO: Om den här misslyckas kommer inte appen att starta igen. Tror jag
 export async function compareStoredWithScraped(): Promise<boolean> {
   try {
-    const getAllWatchesDbRes = await getAllActiveWatches();
+    const activeWatchesDbRes = await getAllActiveWatches();
 
-    if (getAllWatchesDbRes.error || getAllWatchesDbRes.result === null) {
+    if (activeWatchesDbRes.error || activeWatchesDbRes.result === null) {
       return false;
     }
 
@@ -111,19 +111,17 @@ export async function compareStoredWithScraped(): Promise<boolean> {
     //
     // console.log("hejsan ", hejsan.result?.[0]);
 
-    const activeWatchesLength = getAllWatchesDbRes.result.length;
+    const activeWatchesLength = activeWatchesDbRes.result.length;
 
     activeWatchesLength === 0 ? console.log(`No active watches @ %c${currentDateAndTime()}`, "color: deepskyblue") : console.log(
       `Scraping ${activeWatchesLength} ${activeWatchesLength === 1 ? "watch" : "watches"} @ %c${currentDateAndTime()}`,
       "color: deepskyblue",
     );
 
-    const storedActiveWatches = getAllWatchesDbRes.result;
-    for (const watch of storedActiveWatches) {
-      const storedWatch = watch;
-
+    for (const storedWatch of activeWatchesDbRes.result) {
       const storedWatches: ScrapedWatch[] = storedWatch.watches;
 
+      await setTimeoutPromise(250);
       const scrapedWatches = await scrapeWatchInfo(storedWatch.watch_to_scrape);
 
       if (scrapedWatches.error || scrapedWatches.result === null) {
@@ -159,9 +157,7 @@ export async function compareStoredWithScraped(): Promise<boolean> {
 setInterval(compareStoredWithScraped, INTERVAL_IN_MS);
 
 async function handleNewScrapedWatch(newScrapedWatches: ScrapedWatch[]) {
-  // Vänta 1 sekund mellan varje mail
-  await setTimeoutPromise(1_000);
-
+  // TODO: Ska den här låsa scraping?
   for (const watch of newScrapedWatches) {
     await sendNotification(watch);
   }
@@ -171,11 +167,9 @@ async function sendNotification(watch: ScrapedWatch) {
   try {
     await sendEmailNotification(getEmailText(watch));
 
-    infoLogger.info({ message: `Email sent with watch name: ${(watch.name)}, link: ${watch.link}` });
+    infoLogger.info({ message: `Email sent. Name: ${(watch.name)}, link: ${watch.link}` });
 
-    const notificationDelay = Deno.env.get("ENV") === "dev" ? 1 : 5_000;
-
-    await new Promise((resolve) => setTimeout(resolve, notificationDelay));
+    await setTimeoutPromise(5_000);
   } catch (err) {
     errorLogger.error({
       message: "Function sendWatchNotification failed.",
@@ -187,12 +181,9 @@ async function sendNotification(watch: ScrapedWatch) {
 }
 
 function getEmailText(watch: ScrapedWatch) {
-  return `
-${watch.name}
-
-Länk: ${watch.link}
-
-Detta mail skickades: ${currentTime()}`;
+  return watch.name + "\n\n" +
+    `Länk: ${watch.link}\n\n` +
+    `Detta mail skickades: ${currentTime()}`;
 }
 
 interface ScrapeWatchInfoRes {

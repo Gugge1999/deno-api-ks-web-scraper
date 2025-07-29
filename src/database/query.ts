@@ -1,5 +1,5 @@
 import postgres, { PendingQuery, Row } from "postgres";
-import { errorLogger, infoLogger } from "../services/logger.ts";
+import { errorLogger } from "../services/logger.ts";
 
 export const sql = await getDb();
 
@@ -40,9 +40,7 @@ export async function hejsanTesting(query: PendingQuery<Row[]>[]): Promise<DbRes
     const transactionResult = await sql.begin((sql) => {
       const hejsan = "update watch set active = false where active = false returning *";
 
-      return [
-        sql`update watch set active = false where active = false returning *`,
-      ];
+      return [sql`update watch set active = false where active = false returning *`];
     });
 
     return {

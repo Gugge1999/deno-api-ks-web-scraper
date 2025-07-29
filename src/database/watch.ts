@@ -1,4 +1,4 @@
-import { WatchDbRes } from "../models/watch-db-res.ts";
+import { WatchAndNotificationDbRes, WatchDbRes } from "../models/watch-db-res.ts";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { runDbQuery, sql } from "./query.ts";
 import { errorLogger } from "../services/logger.ts";
@@ -32,11 +32,27 @@ export function saveWatch(label: string, watchToScrape: string, scrapedWatches: 
   return runDbQuery(newWatchQuery);
 }
 
+export function getWatchesAndNotifications() {
+  return runDbQuery(sql<WatchAndNotificationDbRes[]>`
+      select 
+          watch.id,
+          label,
+          watches,
+          active,
+          watch_to_scrape,
+          last_email_sent,
+          added,
+          last_changed,
+          coalesce(array_remove(array_agg(sent), null), '{}') as notifications
+      from watch
+          left join notification on notification.watch_id = watch.id
+      group by watch.id, added
+      order by added;`);
+}
+
 // TODO: Kolla att den här fortfarande fungerar
 export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: string) {
   return await sql.begin(async (sql) => {
-    console.time("stopwatch");
-
     const watchQuery = sql<WatchDbRes[]>`
         UPDATE watch
             SET watches = ${newWatches as unknown as SerializableParameter}, last_email_sent = now()
@@ -44,8 +60,6 @@ export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: s
                     RETURNING *`;
 
     const notificationQuery = insertNewNotification(watchId);
-
-    console.timeEnd("stopwatch");
 
     const [watch, notification] = await Promise.all([runDbQuery(watchQuery), runDbQuery(notificationQuery)]);
 

@@ -1,10 +1,8 @@
 import { Context, httpErrors, Router, RouterContext } from "@oak/oak";
 import { validate } from "jsr:@std/uuid";
-import { getAllNotifications } from "../database/notification.ts";
-import { deleteWatchById, getAllWatches, saveWatch, toggleActiveStatus } from "../database/watch.ts";
-import { Notification } from "../models/notification.ts";
+import { deleteWatchById, getWatchesAndNotifications, saveWatch, toggleActiveStatus } from "../database/watch.ts";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
-import { WatchDbRes } from "../models/watch-db-res.ts";
+import { WatchAndNotificationDbRes } from "../models/watch-db-res.ts";
 import { WatchAndNotificationDto } from "../models/watch-dto.ts";
 import { scrapeWatchInfo } from "../services/scraper.ts";
 
@@ -14,20 +12,15 @@ const scraperRoutes = new Router({
 
 scraperRoutes
   .get(`/all-watches`, async (context: Context) => {
-    // TODO: Det är nog en bra idé att göra båda selects i samma anrop för att förhindra att två connections behöver skapas.
-    // Kanske med https://github.com/porsager/postgres?tab=readme-ov-file#multiple-statements-in-one-query ?
+    const watchesAndNotification = await getWatchesAndNotifications();
 
-    const [allWatches, notifications] = await Promise.all([getAllWatches(), getAllNotifications()]);
-
-    if (allWatches.error || notifications.error || notifications.result === null) {
-      throw new httpErrors.InternalServerError(
-        `Kunde inte hämta bevakningar och notiser. dbError - allWatches.error: ${allWatches.error} "- notification error: ${notifications.error}`,
-      );
+    if (watchesAndNotification.error) {
+      throw new httpErrors.InternalServerError(`Kunde inte hämta bevakningar och notiser. dbError: ${watchesAndNotification.error}`);
     }
 
     let returnDto: WatchAndNotificationDto[] = [];
-    if (allWatches.result && allWatches.result.length > 0) {
-      returnDto = createWatchDto(allWatches.result, notifications.result);
+    if (watchesAndNotification.result && watchesAndNotification.result.length > 0) {
+      returnDto = createWatchDto(watchesAndNotification.result);
     }
 
     context.response.body = returnDto;
@@ -112,12 +105,11 @@ scraperRoutes
     context.response.body = returnDto;
   });
 
-function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification[]): WatchAndNotificationDto[] {
+function createWatchDto(allWatches: WatchAndNotificationDbRes[]): WatchAndNotificationDto[] {
   const returnDto: WatchAndNotificationDto[] = [];
 
   for (const scrapedWatch of allWatches) {
     const watches: ScrapedWatch[] = scrapedWatch.watches;
-    const notificationsForWatch = allNotifications.filter((n) => scrapedWatch.id === n.watch_id).map((m) => m.sent);
 
     const dto: WatchAndNotificationDto = {
       id: scrapedWatch.id,
@@ -126,7 +118,7 @@ function createWatchDto(allWatches: WatchDbRes[], allNotifications: Notification
       label: scrapedWatch.label,
       lastEmailSent: scrapedWatch.last_email_sent,
       watchToScrape: scrapedWatch.watch_to_scrape,
-      notifications: notificationsForWatch,
+      notifications: scrapedWatch.notifications,
       latestWatch: {
         postedDate: watches[0].postedDate,
         link: watches[0].link,
