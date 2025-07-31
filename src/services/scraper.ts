@@ -109,8 +109,14 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
   };
 }
 
+let lockScraping = false;
+
 export async function compareStoredWithScraped(): Promise<boolean> {
   try {
+    if (lockScraping) {
+      return false;
+    }
+
     const activeWatchesDbRes = await getAllActiveWatches();
 
     if (activeWatchesDbRes.error || activeWatchesDbRes.result === null) {
@@ -169,19 +175,25 @@ export async function compareStoredWithScraped(): Promise<boolean> {
 setInterval(compareStoredWithScraped, INTERVAL_IN_MS);
 
 async function handleNewScrapedWatch(newScrapedWatches: ScrapedWatch[]) {
-  // TODO: Ska den här låsa scraping?
+  // Lås scraping av nya bevakningar medans notiser skickas
+  lockScraping = true;
+
   for (const watch of newScrapedWatches) {
     await sendNotification(watch);
   }
+
+  lockScraping = false;
 }
 
-async function sendNotification(watch: ScrapedWatch) {
+async function sendNotification(watch: ScrapedWatch): Promise<boolean> {
   try {
     await sendEmailNotification(getEmailText(watch));
 
     infoLogger.info({ message: `Email sent. Name: ${(watch.name)}, link: ${watch.link}` });
 
-    await setTimeoutPromise(5_000);
+    await setTimeoutPromise(15_000);
+    lockScraping = false;
+    return true;
   } catch (err) {
     errorLogger.error({
       message: "Function sendWatchNotification failed.",
@@ -189,11 +201,15 @@ async function sendNotification(watch: ScrapedWatch) {
     });
 
     await sendErrorEmailNotification(err);
+
+    lockScraping = false;
+
+    return false;
   }
 }
 
 function getEmailText(watch: ScrapedWatch) {
-  return watch.name + "\n\n" +
+  return `${watch.name}\n\n` +
     `Länk: ${watch.link}\n\n` +
     `Detta mail skickades: ${currentTime()}`;
 }
