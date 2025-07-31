@@ -191,7 +191,7 @@ async function sendNotification(watch: ScrapedWatch): Promise<boolean> {
 
     infoLogger.info({ message: `Email sent. Name: ${(watch.name)}, link: ${watch.link}` });
 
-    await setTimeoutPromise(15_000);
+    await setTimeoutPromise(5_000);
     lockScraping = false;
     return true;
   } catch (err) {
