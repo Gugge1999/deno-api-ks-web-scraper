@@ -1,5 +1,7 @@
 > [!IMPORTANT]
 > ### TODO
+> * Byt till uuid v7
+> 
 > * Lägg till [OpenTelemetry](https://docs.deno.com/runtime/fundamentals/open_telemetry/)
 > 
 > * Uppdatera postgres till senaste version: Verkar vara ganska svårt på fly.io - [Guide](https://fly.io/docs/postgres/managing/upgrades/)

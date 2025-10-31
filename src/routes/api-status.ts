@@ -4,9 +4,7 @@ import { Context, Router } from "@oak/oak";
 import { INTERVAL_IN_MIN } from "../constants/config.ts";
 import { currentTime } from "../services/time-and-date.ts";
 
-const apiStatusRoutes = new Router({
-  prefix: "/api",
-});
+const apiStatusRoutes = new Router({ prefix: "/api" });
 
 let numberOfConnectedUsers = 0;
 
@@ -35,7 +33,7 @@ function broadcastApiStatus(socket: WebSocket): void {
 function logConnectedUsersToConsole(type: "connect" | "disconnect"): void {
   console.log(
     `Client ${type === "connect" ? "con" : "disc"} @ %c${currentTime()}`,
-    "color: orange",
+    `color: orange`,
     `- Total connected users: ${numberOfConnectedUsers}`,
   );
 }

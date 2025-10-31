@@ -15,6 +15,6 @@ shift({
     Deno.exit();
   })
   .catch((err: unknown) => {
-    console.error("Migrations failed. Error:", err);
+    console.error(`Migrations failed @ ${currentDateAndTime()} . Error:`, err);
     Deno.exit();
   });

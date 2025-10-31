@@ -30,19 +30,19 @@ export function saveWatch(label: string, watchToScrape: string, scrapedWatches: 
 export function getWatchesAndNotifications() {
   return runDbQuery(sql<WatchAndNotificationDbRes[]>`
       select 
-          watch.id,
-          label,
-          watches,
-          active,
-          watch_to_scrape,
-          last_email_sent,
-          added,
-          last_changed,
+          w.id,
+          w.label,
+          w.watches,
+          w.active,
+          w.watch_to_scrape,
+          w.last_email_sent,
+          w.added,
+          w.last_changed,
           coalesce(array_remove(array_agg(sent), null), '{}') as notifications
-      from watch
-          left join notification on notification.watch_id = watch.id
-      group by watch.id, added
-      order by added;`);
+      from watch w
+          left join notification n on n.watch_id = w.id
+      group by w.id, w.added
+      order by w.added;`);
 }
 
 export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: string) {

@@ -5,7 +5,7 @@ import { currentDateAndTime, currentTime } from "./time-and-date.ts";
 import { sendEmailNotification, sendErrorEmailNotification } from "./email-notification.ts";
 import { errorLogger, infoLogger } from "./logger.ts";
 import { getAllActiveWatches, updateStoredWatches } from "../database/watch.ts";
-import { INTERVAL_IN_MS } from "../constants/config.ts";
+import { SCRAPING_INTERVAL_IN_MS } from "../constants/config.ts";
 import { setTimeout as setTimeoutPromise } from "node:timers/promises";
 import { retry, RetryError, type RetryOptions } from "jsr:@std/async";
 
@@ -23,8 +23,10 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
     response = await retry(() => fetch(watchToScrape), retryOptions);
   } catch (err) {
     if (err instanceof RetryError) {
-      errorLogger.error({ Msg: `Retry error : + ${err.message}` });
-      errorLogger.error({ Cause: `Error cause : + ${err.cause}` });
+      errorLogger.error({
+        Message: `Retry error: ${err.message}`,
+        Cause: `Cause:  ${err.cause}`,
+      });
     }
 
     const message = `Kunde inte hämta url. Angiven url: ${watchToScrape}`;
@@ -111,16 +113,16 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
 
 let lockScraping = false;
 
-export async function compareStoredWithScraped(): Promise<boolean> {
+export async function compareStoredWithScraped() {
   try {
     if (lockScraping) {
-      return false;
+      return;
     }
 
     const activeWatchesDbRes = await getAllActiveWatches();
 
     if (activeWatchesDbRes.error || activeWatchesDbRes.result === null) {
-      return false;
+      return;
     }
 
     // const iuqhwdiuqhw = sql`update watch set active = false where active = false returning *`;
@@ -143,7 +145,7 @@ export async function compareStoredWithScraped(): Promise<boolean> {
       const scrapedWatches = await scrapeWatchInfo(storedWatch.watch_to_scrape);
 
       if (scrapedWatches.error || scrapedWatches.result === null) {
-        return false;
+        return;
       }
 
       const intersectingNewScrapedWatches = scrapedWatches.result.filter(({ postedDate: a }) =>
@@ -154,25 +156,21 @@ export async function compareStoredWithScraped(): Promise<boolean> {
         const updateWatchRes = await updateStoredWatches(scrapedWatches.result, storedWatch.id);
 
         if (updateWatchRes.error || updateWatchRes.result === null) {
-          return false;
+          return;
         }
 
         await handleNewScrapedWatch(intersectingNewScrapedWatches);
       }
     }
-
-    return true;
   } catch (err) {
     errorLogger.error({
       message: "compareStoredWithScraped failed.",
       stacktrace: err,
     });
-
-    return false;
   }
 }
 
-setInterval(compareStoredWithScraped, INTERVAL_IN_MS);
+setInterval(compareStoredWithScraped, SCRAPING_INTERVAL_IN_MS);
 
 async function handleNewScrapedWatch(newScrapedWatches: ScrapedWatch[]) {
   // Lås scraping av nya bevakningar medans notiser skickas
@@ -185,7 +183,7 @@ async function handleNewScrapedWatch(newScrapedWatches: ScrapedWatch[]) {
   lockScraping = false;
 }
 
-async function sendNotification(watch: ScrapedWatch): Promise<boolean> {
+async function sendNotification(watch: ScrapedWatch) {
   try {
     await sendEmailNotification(getEmailText(watch));
 
@@ -193,7 +191,6 @@ async function sendNotification(watch: ScrapedWatch): Promise<boolean> {
 
     await setTimeoutPromise(5_000);
     lockScraping = false;
-    return true;
   } catch (err) {
     errorLogger.error({
       message: "Function sendWatchNotification failed.",
@@ -203,8 +200,6 @@ async function sendNotification(watch: ScrapedWatch): Promise<boolean> {
     await sendErrorEmailNotification(err);
 
     lockScraping = false;
-
-    return false;
   }
 }
 
