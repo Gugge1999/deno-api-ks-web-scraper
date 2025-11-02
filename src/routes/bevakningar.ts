@@ -11,7 +11,7 @@ const scraperRoutes = new Router({
 });
 
 scraperRoutes
-  .get(`/all-watches`, async (context: Context) => {
+  .get(`/all-watches`, async function (context: Context) {
     const watchesAndNotification = await getWatchesAndNotifications();
 
     if (watchesAndNotification.error) {
@@ -25,7 +25,7 @@ scraperRoutes
 
     context.response.body = returnDto;
   })
-  .delete(`/delete-watch/:id`, async (context: RouterContext<string>) => {
+  .delete(`/delete-watch/:id`, async function (context: RouterContext<string>) {
     context.assert(validate(context?.params?.id), 422, "id måste vara av typen uuid v4");
 
     const deleteWatch = await deleteWatchById(context.params.id);
@@ -36,7 +36,7 @@ scraperRoutes
 
     context.response.body = { deleteWatchId: context.params.id };
   })
-  .put(`/toggle-active-statuses`, async (context: Context) => {
+  .put(`/toggle-active-statuses`, async function (context: Context) {
     await validateBody(context);
     const body = await context.request.body.json();
     const { newActiveStatus, ids }: { newActiveStatus?: boolean; ids?: string[] } = body;
@@ -55,7 +55,7 @@ scraperRoutes
 
     context.response.body = {};
   })
-  .post(`/save-watch`, async (context: Context) => {
+  .post(`/save-watch`, async function (context: Context) {
     await validateBody(context);
 
     const { label, watchToScrape }: { label?: string; watchToScrape?: string } = await context.request.body.json();

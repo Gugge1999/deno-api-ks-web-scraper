@@ -21,7 +21,7 @@ const userRoutes = new Router({
   prefix: "/api/user",
 });
 
-userRoutes.post(`/register`, async (context) => {
+userRoutes.post(`/register`, async function (context) {
   const { email, password } = await validateBodyUser(context);
 
   // if (password.length < 6) {
@@ -80,7 +80,7 @@ userRoutes.post(`/register`, async (context) => {
   context.response.body = "";
 });
 
-userRoutes.post(`/login`, async (context) => {
+userRoutes.post(`/login`, async function (context) {
   const { password, email } = await validateBodyUser(context);
 
   // const jwtToken = await context.cookies.get("jwt");
@@ -103,7 +103,7 @@ userRoutes.post(`/login`, async (context) => {
   //
   // if (user.result?.length === 0) {
   //   throw new httpErrors.BadRequest("Email finns inte registered");
-  // }
+  //}
 
   try {
     const auth = getAuth(fbApp);
@@ -129,7 +129,7 @@ userRoutes.post(`/login`, async (context) => {
 });
 
 // TODO: Här gäller det att kolla att rätt användare är inloggad
-userRoutes.delete(`/delete/:id`, async (context) => {
+userRoutes.delete(`/delete/:id`, async function (context) {
   if (!context?.params?.id || !validate(context?.params?.id)) {
     throw new httpErrors.UnprocessableEntity("Ogiltigt id för att radera användare");
   }
@@ -163,7 +163,7 @@ userRoutes.delete(`/delete/:id`, async (context) => {
 });
 
 // TODO: Här gäller det att kolla att rätt användare är inloggad
-userRoutes.post(`/reset-password`, async (context) => {
+userRoutes.post(`/reset-password`, async function (context) {
   await validateBody(context);
 
   const { email }: { email?: string } = await context.request.body.json();
@@ -197,7 +197,7 @@ userRoutes.post(`/reset-password`, async (context) => {
   context.response.body = "";
 });
 
-userRoutes.post(`logout`, async (context) => {
+userRoutes.post(`logout`, async function (context) {
   if (await context.cookies.get(ACCESS_TOKEN_CONST)) {
     context.cookies.delete(ACCESS_TOKEN_CONST);
   } else {

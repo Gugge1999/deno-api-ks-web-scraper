@@ -8,7 +8,7 @@ const apiStatusRoutes = new Router({ prefix: "/api" });
 
 let numberOfConnectedUsers = 0;
 
-apiStatusRoutes.get(`/status`, (context: Context) => {
+apiStatusRoutes.get(`/status`, function (context: Context) {
   const socket = context.upgrade();
 
   socket.onclose = () => {
