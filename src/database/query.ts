@@ -79,8 +79,6 @@ async function getDb() {
     errorLogger.error("DATABASE_URL is not set in environment variables");
   }
 
-  console.log("Connecting to production database...", prodDbUrl);
-
   return postgres(prodDbUrl, {
     idle_timeout: 20,
     max_lifetime: 60 * 30,
