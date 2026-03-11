@@ -1,6 +1,8 @@
 > [!IMPORTANT]
 > ### TODO
-> * Byt till uuid v7
+> Byt från json till jsonb
+> 
+> * Byt till uuid v7. Fly.io måste ha postgres-flex med version 18. [Docker list](https://hub.docker.com/r/flyio/postgres-flex/tags). Se Github [issue](https://github.com/fly-apps/postgres-flex/issues/305) Guide för att göra själva uppgraderingen [Länk](https://sthom.kiwi/blog/migrate-postgres-fly)
 > 
 > * Lägg till [OpenTelemetry](https://docs.deno.com/runtime/fundamentals/open_telemetry/)
 > 

@@ -31,6 +31,7 @@ export async function sendEmailNotification(emailText: string) {
 }
 
 export async function sendErrorEmailNotification(err: unknown) {
+  // TODO: Är det en bra idé att skapa en helper metod som skickar tillbaka starkt typat vilka värdet som kan returneras?
   if (Deno.env.get("ENV") === "dev") {
     return;
   }

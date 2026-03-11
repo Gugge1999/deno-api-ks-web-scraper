@@ -61,7 +61,7 @@ async function getDb() {
   // Behövs för att sql migrations ska fungera
   await import("jsr:@std/dotenv/load");
 
-  const env = Deno.env.get("ENV")?.toLowerCase() ?? "";
+  const env = (Deno.env.get("ENV")?.toLowerCase() ?? "") as "" | "dev" | "prod" | undefined;
 
   if (env === "") {
     errorLogger.error("ENV is not set in environment variables");

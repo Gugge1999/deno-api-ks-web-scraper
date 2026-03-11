@@ -1,8 +1,8 @@
-import type { ApiStatus } from "../models/status.dto.ts";
 import { formatBytes, getUptime } from "../services/status.ts";
 import { Context, Router } from "@oak/oak";
 import { INTERVAL_IN_MIN } from "../constants/config.ts";
 import { currentTime } from "../services/time-and-date.ts";
+import { ApiStatus } from "../models/status.dto.ts";
 
 const apiStatusRoutes = new Router({ prefix: "/api" });
 
@@ -32,9 +32,9 @@ function broadcastApiStatus(socket: WebSocket): void {
 
 function logConnectedUsersToConsole(type: "connect" | "disconnect"): void {
   console.log(
-    `Client ${type === "connect" ? "con" : "disc"} @ %c${currentTime()}`,
+    `Client ${type === "connect" ? "con " : "disc"} @ %c${currentTime()}`,
     `color: orange`,
-    `- Total connected users: ${numberOfConnectedUsers}`,
+    `- Users: ${numberOfConnectedUsers}`,
   );
 }
 

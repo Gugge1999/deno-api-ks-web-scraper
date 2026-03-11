@@ -15,7 +15,6 @@ export const errorLogger = createLogger({
     errors({ stack: true }),
     timestamp({ format: TIME_FORMAT_LOGGER }),
     prettyPrint(),
-    format.colorize({ all: true }),
   ),
 
   exitOnError: false,
