@@ -8,7 +8,6 @@
     "@oak/oak": "jsr:@oak/oak@^17.2.0",
     "@std/async": "jsr:@std/async@^1.2.0",
     "@tajpouria/cors": "jsr:@tajpouria/cors@^1.2.1",
-    "@std/datetime": "jsr:@std/datetime@^0.225.7",
     "@std/path": "jsr:@std/path@^1.1.4",
     "@std/uuid": "jsr:@std/uuid@^1.1.0",
 

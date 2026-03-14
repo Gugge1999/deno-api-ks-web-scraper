@@ -1,15 +1,18 @@
 import process from "node:process";
-import { difference } from "@std/datetime/difference";
 import { ApiUptime } from "../models/status.dto.ts";
 
 export function getUptime(): ApiUptime {
-  const date = new Date();
-  date.setSeconds(date.getSeconds() + process.uptime());
+  const now = Temporal.Now.instant();
+  const uptimeSeconds = Math.floor(process.uptime());
 
-  const uptime = difference(new Date(), date);
+  const start = now.subtract({ seconds: uptimeSeconds });
 
-  const milliseconds = uptime.milliseconds ?? 1;
-  const totalSeconds = Math.floor(milliseconds / 1000);
+  const duration = start.until(now, { largestUnit: "hours" });
+
+  const totalSeconds = duration.hours * 3600 +
+    duration.minutes * 60 +
+    duration.seconds;
+
   const totalMinutes = Math.floor(totalSeconds / 60);
   const totalHours = Math.floor(totalMinutes / 60);
   const totalDays = Math.floor(totalHours / 24);
@@ -22,14 +25,7 @@ export function getUptime(): ApiUptime {
   const days = totalDays % 30;
   const months = totalMonths % 12;
 
-  return {
-    seconds,
-    minutes,
-    hours,
-    days,
-    months,
-    years,
-  };
+  return { seconds, minutes, hours, days, months, years };
 }
 
 export function formatBytes(bytes: number) {
