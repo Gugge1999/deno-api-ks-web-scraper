@@ -1,14 +1,14 @@
-import { initializeApp } from "npm:@firebase/app@0.10.17";
 import { oakCors } from "@tajpouria/cors";
 import { Application } from "@oak/oak";
 import admin from "firebase-admin";
-import "jsr:@std/dotenv/load";
+import "@std/dotenv/load";
 import { compareStoredWithScraped } from "./services/scraper.ts";
 import errorMiddleware from "./middleware/error-middleware.ts";
 import { currentTime } from "./services/time-and-date.ts";
 import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
 import userRoutes from "./routes/user.ts";
+import { initializeApp } from "firebase/app";
 
 console.log(`Init api @%c ${currentTime()}`, "color: green");
 
@@ -43,7 +43,7 @@ const firebaseConfig = {
 
 export const fbApp = initializeApp(firebaseConfig);
 
-// OBS: Lägg märke till import av jsr:@std/dotenv/load. Utan den fungerar inte .env
+// OBS: Lägg märke till import av @std/dotenv/load. Utan den fungerar inte .env
 const denoPort = Number.parseInt(Deno.env.get("PORT") || "3000");
 
 const cert = JSON.parse(Deno.env.get("FBSERVICEACCOUNTKEY") ?? "");

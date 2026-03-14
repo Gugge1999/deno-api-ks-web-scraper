@@ -7,10 +7,13 @@
   "imports": {
     "@oak/oak": "jsr:@oak/oak@^17.2.0",
     "@std/async": "jsr:@std/async@^1.2.0",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.6",
     "@tajpouria/cors": "jsr:@tajpouria/cors@^1.2.1",
     "@std/path": "jsr:@std/path@^1.1.4",
     "@std/uuid": "jsr:@std/uuid@^1.1.0",
 
+    "firebase/auth": "npm:@firebase/auth@^1.12.1",
+    "firebase/app": "npm:@firebase/app@^0.14.9",
     "cheerio": "npm:cheerio@1.2.0",
     "firebase-admin": "npm:firebase-admin@^13.7.0",
     "jose": "npm:jose@^6.2.1",

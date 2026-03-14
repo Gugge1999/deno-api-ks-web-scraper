@@ -1,5 +1,5 @@
 import { Context, httpErrors, Router, RouterContext } from "@oak/oak";
-import { validate } from "jsr:@std/uuid";
+import { validate } from "@std/uuid";
 import { deleteWatchById, getWatchesAndNotifications, saveWatch, toggleActiveStatus } from "../database/watch.ts";
 import { ScrapedWatch } from "../models/scraped-watches.ts";
 import { WatchAndNotificationDbRes } from "../models/watch-db-res.ts";

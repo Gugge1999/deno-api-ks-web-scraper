@@ -7,7 +7,7 @@ import { errorLogger, infoLogger } from "./logger.ts";
 import { getAllActiveWatches, updateStoredWatches } from "../database/watch.ts";
 import { SCRAPING_INTERVAL_IN_MS } from "../constants/config.ts";
 import { setTimeout as setTimeoutPromise } from "node:timers/promises";
-import { retry, RetryError, type RetryOptions } from "jsr:@std/async";
+import { retry, RetryError, type RetryOptions } from "@std/async";
 
 const retryOptions: RetryOptions = {
   maxAttempts: 3,

@@ -1,16 +1,16 @@
 import { httpErrors } from "@oak/oak";
 import { Router } from "@oak/oak/router";
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
-import { validate } from "jsr:@std/uuid";
+import { validate } from "@std/uuid";
 import { Buffer } from "node:buffer";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
-import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, validatePassword } from "npm:@firebase/auth@1.8.1";
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, validatePassword } from "firebase/auth";
 
 import { deleteUserById, getUserByEmail, getUserById } from "../database/user.ts";
 import { errorLogger } from "../services/logger.ts";
 import { validateBody } from "./bevakningar.ts";
 import { fbApp } from "../main.ts";
-import { FirebaseError } from "npm:@firebase/app@0.10.17";
+import { FirebaseError } from "firebase/app";
 
 // TODO: Den här borde sättas i .env
 const secret = new TextEncoder().encode("secret-that-no-one-knows");

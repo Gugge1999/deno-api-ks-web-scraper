@@ -61,7 +61,7 @@ export async function hejsanTesting(query: PendingQuery<Row[]>[]): Promise<DbRes
 
 async function getDb() {
   // Behövs för att sql migrations ska fungera
-  await import("jsr:@std/dotenv/load");
+  await import("@std/dotenv/load");
 
   const env = (Deno.env.get("ENV")?.toLowerCase() ?? "") as "" | "dev" | "prod" | undefined;
 
