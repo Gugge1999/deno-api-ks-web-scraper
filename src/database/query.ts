@@ -76,6 +76,7 @@ async function getDb() {
   }
 
   const prodDbUrl = Deno.env.get("DATABASE_URL") ?? "";
+  console.log("hejsan", prodDbUrl);
 
   if (prodDbUrl === "") {
     errorLogger.error("DATABASE_URL is not set in environment variables");
