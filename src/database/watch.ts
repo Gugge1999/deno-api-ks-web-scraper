@@ -38,7 +38,7 @@ export function getWatchesAndNotifications() {
           w.last_email_sent,
           w.added,
           w.last_changed,
-          coalesce(array_remove(array_agg(sent), null), '{}') as notifications
+          coalesce(array_remove(array_agg(n.sent), null), '{}') as notifications
       from watch w
           left join notification n on n.watch_id = w.id
       group by w.id, w.added
@@ -49,9 +49,9 @@ export async function updateStoredWatches(newWatches: ScrapedWatch[], watchId: s
   return await sql.begin(async (sql) => {
     const watchQuery = sql<WatchDbRes[]>`
         UPDATE watch
-            SET watches = ${newWatches as unknown as SerializableParameter}, last_email_sent = now()
-                WHERE id = ${watchId}
-                    RETURNING *`;
+        SET watches = ${newWatches as unknown as SerializableParameter}, last_email_sent = now()
+        WHERE id = ${watchId}
+        RETURNING *`;
 
     const notificationQuery = insertNewNotification(watchId);
 
