@@ -63,7 +63,7 @@ async function getDb() {
   // Behövs för att sql migrations ska fungera
   await import("@std/dotenv/load");
 
-  const env = (Deno.env.get("ENV")?.toLowerCase() ?? "") as "" | "dev" | "prod" | undefined;
+  const env = (Deno.env.get("ENV")?.toLowerCase() ?? "") as "" | "dev" | "prod";
 
   if (env === "") {
     errorLogger.error("ENV is not set in environment variables");
@@ -76,7 +76,6 @@ async function getDb() {
   }
 
   const prodDbUrl = Deno.env.get("DATABASE_URL") ?? "";
-  console.log("hejsan", prodDbUrl);
 
   if (prodDbUrl === "") {
     errorLogger.error("DATABASE_URL is not set in environment variables");
