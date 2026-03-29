@@ -14,11 +14,6 @@ console.log(`Init api @%c ${currentTime()}`, "color: green");
 
 const app = new Application();
 
-// app.use(oakCors({
-//   credentials: true,
-//   origin: true,
-// }));
-
 app.use(oakCors());
 
 app.use(errorMiddleware);
