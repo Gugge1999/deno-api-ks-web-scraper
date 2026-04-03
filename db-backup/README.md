@@ -19,4 +19,4 @@ Eller för att endast schema, ingen data:
 
 `pg_dump -U postgres -d ks-web-scraper --schema-only -f C:\Code\deno\deno-api-ks-web-scraper\db-backup\backup.sql`
 
-Samma lösenord som i .env
+Samma lösenord som i `.env`
