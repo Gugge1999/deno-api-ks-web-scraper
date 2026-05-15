@@ -159,64 +159,56 @@ ALTER TABLE ONLY public.migrations ALTER COLUMN migration_id SET DEFAULT nextval
 -- Name: watch PK_fcd14254f9a60722c954c0174d0; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.watch
-    ADD CONSTRAINT "PK_fcd14254f9a60722c954c0174d0" PRIMARY KEY (id);
+ALTER TABLE ONLY public.watch ADD CONSTRAINT "PK_fcd14254f9a60722c954c0174d0" PRIMARY KEY (id);
 
 
 --
 -- Name: app_user app_users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.app_user
-    ADD CONSTRAINT app_users_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.app_user ADD CONSTRAINT app_users_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: migrations migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.migrations
-    ADD CONSTRAINT migrations_pkey PRIMARY KEY (migration_id);
+ALTER TABLE ONLY public.migrations ADD CONSTRAINT migrations_pkey PRIMARY KEY (migration_id);
 
 
 --
 -- Name: notification notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.notification
-    ADD CONSTRAINT notifications_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.notification ADD CONSTRAINT notifications_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: testing testing_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.testing
-    ADD CONSTRAINT testing_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.testing ADD CONSTRAINT testing_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: app_user unique_email; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.app_user
-    ADD CONSTRAINT unique_email UNIQUE (email);
+ALTER TABLE ONLY public.app_user ADD CONSTRAINT unique_email UNIQUE (email);
 
 
 --
 -- Name: app_user unique_username; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.app_user
-    ADD CONSTRAINT unique_username UNIQUE (username);
+ALTER TABLE ONLY public.app_user ADD CONSTRAINT unique_username UNIQUE (username);
 
 
 --
 -- Name: notification notifications_watch_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.notification
-    ADD CONSTRAINT notifications_watch_id_fkey FOREIGN KEY (watch_id) REFERENCES public.watch(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.notification ADD CONSTRAINT notifications_watch_id_fkey FOREIGN KEY (watch_id) REFERENCES public.watch(id) ON DELETE CASCADE;
 
 
 --
