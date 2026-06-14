@@ -29,7 +29,7 @@ export async function scrapeWatchInfo(watchToScrape: string): Promise<ScrapeWatc
       });
     }
 
-    const message = `Kunde inte hämta url. Angiven url: ${watchToScrape}`;
+    const message = `Kunde inte hämta url: ${watchToScrape}`;
 
     errorLogger.error({ message });
 

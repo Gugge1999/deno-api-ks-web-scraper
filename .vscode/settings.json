@@ -2,5 +2,18 @@
   "deno.enable": true,
   "[typescript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
-  }
+  },
+  "sqltools.connections": [
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "database": "ks-web-scraper",
+      "username": "postgres",
+      "name": "postgres"
+    }
+  ],
+  "sqlTaggedTemplateLiterals.tags": ["sql"]
 }

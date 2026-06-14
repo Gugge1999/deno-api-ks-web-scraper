@@ -13,10 +13,12 @@
 
 ## CLI
 
-`pg_dump -U postgres -d ks-web-scraper -f C:\Code\deno\deno-api-ks-web-scraper\db-backup\backup.sql`
+`pg_dump -U postgres -d ks-web-scraper -f C:\Code\deno\deno-api-ks-web-scraper\db-backup\backup-X.sql`
 
 Eller för att endast schema, ingen data:
 
 `pg_dump -U postgres -d ks-web-scraper --schema-only -f C:\Code\deno\deno-api-ks-web-scraper\db-backup\backup.sql`
+
+För att skapa själva databasen också, använd flaggan `--create` för `-f`:
 
 Samma lösenord som i `.env`

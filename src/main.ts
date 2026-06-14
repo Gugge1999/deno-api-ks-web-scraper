@@ -4,6 +4,7 @@ import admin from "firebase-admin";
 import "@std/dotenv/load";
 import { compareStoredWithScraped } from "./services/scraper.ts";
 import errorMiddleware from "./middleware/error-middleware.ts";
+import requestDurationMiddleware from "./middleware/request-duration-middleware.ts";
 import { currentTime } from "./services/time-and-date.ts";
 import apiStatusRoutes from "./routes/api-status.ts";
 import scraperRoutes from "./routes/bevakningar.ts";
@@ -16,6 +17,7 @@ const app = new Application();
 
 app.use(oakCors());
 
+app.use(requestDurationMiddleware);
 app.use(errorMiddleware);
 
 app.use(apiStatusRoutes.routes());
